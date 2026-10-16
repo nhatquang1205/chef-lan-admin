@@ -3,6 +3,7 @@ import AppLayout from '@/components/AppLayout'
 import RequireAuth from '@/components/RequireAuth'
 import ChangePasswordPage from '@/features/auth/ChangePasswordPage'
 import LoginPage from '@/features/auth/LoginPage'
+import CategoriesPage from '@/features/categories/CategoriesPage'
 import CoursesPage from '@/features/courses/CoursesPage'
 import CourseCreatePage from '@/features/courses/CourseCreatePage'
 import CoursePage from '@/features/courses/CoursePage'
@@ -21,6 +22,7 @@ export default function App() {
           <Route path="/courses/:id" element={<CoursePage />} />
           <Route path="/courses/:courseId/lessons/new" element={<LessonCreatePage />} />
           <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Route>

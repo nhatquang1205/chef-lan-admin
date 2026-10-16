@@ -65,6 +65,14 @@ export interface CategoryAdminResponse extends CategoryResponse {
   status: CategoryStatus
 }
 
+export interface CategoryRequest {
+  name: string
+  description?: string | null
+  thumbnailUrl?: string | null
+  displayOrder?: number | null
+  status: CategoryStatus
+}
+
 export interface CourseListItemResponse {
   id: number
   slug: string

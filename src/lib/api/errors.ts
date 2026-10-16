@@ -7,6 +7,7 @@ const MESSAGES: Record<string, string> = {
   'identity.invalid_refresh_token': 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
   'identity.current_password_incorrect': 'Mật khẩu hiện tại không đúng.',
   'category.not_found': 'Không tìm thấy danh mục.',
+  'category.in_use': 'Danh mục đang được dùng bởi khóa học. Hãy ẩn danh mục thay vì xóa.',
   'course.not_found': 'Không tìm thấy khóa học.',
   'course.no_published_lesson': 'Khóa học cần ít nhất một bài học (nằm trong khóa học) đã xuất bản.',
   'course.no_playable_video': 'Khóa học cần ít nhất một video có thể phát.',

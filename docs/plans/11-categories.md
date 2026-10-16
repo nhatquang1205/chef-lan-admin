@@ -26,3 +26,13 @@ Read the controller/validator in `../chef-lan/src` (`AdminCategoriesController.c
 
 Create, edit, hide/show, delete an unused category, and the in-use delete message, all work against the local API;
 a new category appears in the course form's picker without reloading; `pnpm build` / `pnpm lint` clean.
+
+## Implementation notes
+
+- `features/categories/CategoriesPage.tsx` (table, client-side search/status filter, sorted by display order then name, row
+  actions edit / hide-show / delete) and `CategoryDialog.tsx` (react-hook-form + zod dialog). `/categories` route and nav item added.
+- A picked image is uploaded with `uploadImage` on submit (not on pick); picking a file clears the URL field and vice versa.
+  Empty display order is sent as `null` (server default); PUT sends every field.
+- Delete: a 409 `category.in_use` closes the confirm and opens a second confirm offering "Ẩn danh mục" (sets `InActive`).
+  The row eye button also toggles status directly.
+- Mutations in `lib/api/categories.ts` invalidate `['categories']`, so the course form picker refreshes.
