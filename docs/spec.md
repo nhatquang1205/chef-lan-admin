@@ -93,7 +93,7 @@ Implement in order; each plan leaves the app building and usable.
 | 11 | [Categories](plans/11-categories.md) | done |
 | 12 | [Customers: list, detail, edit, deactivate](plans/12-customers.md) — needs backend B2 | done |
 | 13 | [Customer invitations](plans/13-customer-invites.md) — needs backend B3 | done |
-| 14 | [Customer access: grant / revoke courses and lessons](plans/14-customer-access.md) | todo |
+| 14 | [Customer access: grant / revoke courses and lessons](plans/14-customer-access.md) | done |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.

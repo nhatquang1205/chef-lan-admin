@@ -273,3 +273,43 @@ export interface InviteResponse {
   invitedAt: string
   inviteExpiresAt: string
 }
+
+export type EnrollmentStatus = 'Pending' | 'Active' | 'Expired' | 'Revoked'
+
+interface EnrollmentBase {
+  id: number
+  customerId: number
+  status: EnrollmentStatus
+  source: string
+  accessGrantedAt?: string | null
+  expiresAt?: string | null
+  isPaid: boolean
+  amountPaidVnd?: number | null
+  paymentNote?: string | null
+  paymentReference?: string | null
+}
+
+export interface CourseEnrollmentResponse extends EnrollmentBase {
+  courseId: number
+  courseTitle?: string | null
+}
+
+export interface LessonEnrollmentResponse extends EnrollmentBase {
+  lessonId: number
+  courseId?: number | null
+  lessonTitle?: string | null
+}
+
+export interface CustomerAccessResponse {
+  customerId: number
+  courses: CourseEnrollmentResponse[]
+  lessons: LessonEnrollmentResponse[]
+}
+
+export interface GrantAccessFields {
+  customerId: number
+  isPaid: boolean
+  amountPaidVnd?: number | null
+  paymentNote?: string | null
+  paymentReference?: string | null
+}

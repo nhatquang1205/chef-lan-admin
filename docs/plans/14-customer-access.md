@@ -25,3 +25,10 @@ validators for exact fields (amount needs `isPaid`, whole dong; one of customerI
 Against the local API: grant a course and a single lesson to a test customer, they appear in the lists; revoke both;
 grant the same course twice → the already-active message; the course's enrollment count in the course page follows.
 `pnpm build` / `pnpm lint` clean. Clean up the test data.
+
+## Implementation notes
+
+- Files: `lib/api/access.ts` (`getCustomerAccess`, `grantCourseAccess`, `grantLessonAccess`, `revokeCourseAccess`, `revokeLessonAccess`; key `['customer-access', customerId]`; every mutation also invalidates `['courses']` and `['course', courseId]`), types in `types.ts` (`EnrollmentStatus`, `CourseEnrollmentResponse`, `LessonEnrollmentResponse`, `CustomerAccessResponse`, `GrantAccessFields`), `ENROLLMENT_STATUS_LABEL` in `format.ts`, codes `enrollment.*` in `errors.ts`.
+- `features/customers/AccessSection.tsx` (two tables, "Thu hồi" with confirm on active rows only; rows greyed otherwise; an `Active` row whose `expiresAt` has passed is shown as "Hết hạn") and `GrantAccessDialog.tsx` (tabs, course search via `listCourses` q + 8 results, lesson list via `listLessons` showing "Mua thêm" and price, paid switch + `VndInput` prefilled with the price, note, reference). Mounted in `CustomerPage` after `CustomerForm`.
+- "Cấp quyền" is disabled for an inactive (locked) customer. Source is not sent (backend default `AdminGrant`). Course picker shows only the first 8 matches of the search (no paging).
+- Not exercised in a browser; only build and lint were run.

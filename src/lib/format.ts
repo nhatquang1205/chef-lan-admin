@@ -1,4 +1,4 @@
-import type { CourseLevel, CourseStatus, CustomerStatus, VideoProvider } from '@/lib/api/types'
+import type { CourseLevel, EnrollmentStatus, CourseStatus, CustomerStatus, VideoProvider } from '@/lib/api/types'
 
 const vndFormat = new Intl.NumberFormat('vi-VN')
 
@@ -80,4 +80,11 @@ export const CUSTOMER_STATUS_VARIANT: Record<CustomerStatus, 'default' | 'second
   InviteExpired: 'outline',
   NotInvited: 'outline',
   Inactive: 'destructive',
+}
+
+export const ENROLLMENT_STATUS_LABEL: Record<EnrollmentStatus, string> = {
+  Pending: 'Chờ xử lý',
+  Active: 'Đang hiệu lực',
+  Expired: 'Hết hạn',
+  Revoked: 'Đã thu hồi',
 }

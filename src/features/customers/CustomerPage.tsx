@@ -12,6 +12,7 @@ import { ApiError } from '@/lib/api/client'
 import { deactivateCustomer, getCustomer, inviteCustomer, reactivateCustomer } from '@/lib/api/customers'
 import { messageFor } from '@/lib/api/errors'
 import { CUSTOMER_STATUS_LABEL, CUSTOMER_STATUS_VARIANT, formatDateTime } from '@/lib/format'
+import AccessSection from './AccessSection'
 import CustomerForm from './CustomerForm'
 
 export default function CustomerPage() {
@@ -119,7 +120,7 @@ export default function CustomerPage() {
       {dates.length > 0 && <p className="-mt-3 mb-6 text-sm text-muted-foreground">{dates.join(' · ')}</p>}
       <div className="flex max-w-3xl flex-col gap-6">
         <CustomerForm key={`${customer.id}:${customer.status}`} customer={customer} />
-        {/* Plan 14: the customer's course / lesson access section goes here, below the form. */}
+        <AccessSection customerId={customer.id} isActive={customer.isActive} />
       </div>
       <ConfirmDialog
         open={confirmInvite}
