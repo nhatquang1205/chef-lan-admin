@@ -7,6 +7,9 @@ import CategoriesPage from '@/features/categories/CategoriesPage'
 import CoursesPage from '@/features/courses/CoursesPage'
 import CourseCreatePage from '@/features/courses/CourseCreatePage'
 import CoursePage from '@/features/courses/CoursePage'
+import CustomerCreatePage from '@/features/customers/CustomerCreatePage'
+import CustomerPage from '@/features/customers/CustomerPage'
+import CustomersPage from '@/features/customers/CustomersPage'
 import LessonCreatePage from '@/features/lessons/LessonCreatePage'
 import LessonPage from '@/features/lessons/LessonPage'
 
@@ -23,6 +26,9 @@ export default function App() {
           <Route path="/courses/:courseId/lessons/new" element={<LessonCreatePage />} />
           <Route path="/courses/:courseId/lessons/:lessonId" element={<LessonPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/customers" element={<CustomersPage />} />
+          <Route path="/customers/new" element={<CustomerCreatePage />} />
+          <Route path="/customers/:id" element={<CustomerPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Route>

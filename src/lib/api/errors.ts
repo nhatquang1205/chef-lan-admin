@@ -8,6 +8,8 @@ const MESSAGES: Record<string, string> = {
   'identity.current_password_incorrect': 'Mật khẩu hiện tại không đúng.',
   'category.not_found': 'Không tìm thấy danh mục.',
   'category.in_use': 'Danh mục đang được dùng bởi khóa học. Hãy ẩn danh mục thay vì xóa.',
+  'customer.not_found': 'Không tìm thấy khách hàng.',
+  'customer.email_already_used': 'Email này đã được dùng cho khách hàng khác.',
   'course.not_found': 'Không tìm thấy khóa học.',
   'course.no_published_lesson': 'Khóa học cần ít nhất một bài học (nằm trong khóa học) đã xuất bản.',
   'course.no_playable_video': 'Khóa học cần ít nhất một video có thể phát.',

@@ -1,9 +1,13 @@
-import type { CourseLevel, CourseStatus, VideoProvider } from '@/lib/api/types'
+import type { CourseLevel, CourseStatus, CustomerStatus, VideoProvider } from '@/lib/api/types'
 
 const vndFormat = new Intl.NumberFormat('vi-VN')
 
 export function formatVnd(amount: number): string {
   return `${vndFormat.format(amount)} ₫`
+}
+
+export function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })
 }
 
 export function formatDuration(seconds: number): string {
@@ -60,4 +64,20 @@ export const VIDEO_PROVIDER_LABEL: Record<VideoProvider, string> = {
   Cdn: 'CDN',
   Facebook: 'Facebook',
   None: 'Không có',
+}
+
+export const CUSTOMER_STATUS_LABEL: Record<CustomerStatus, string> = {
+  Active: 'Đã kích hoạt',
+  Invited: 'Đã mời',
+  InviteExpired: 'Lời mời hết hạn',
+  NotInvited: 'Chưa mời',
+  Inactive: 'Đã khóa',
+}
+
+export const CUSTOMER_STATUS_VARIANT: Record<CustomerStatus, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  Active: 'default',
+  Invited: 'secondary',
+  InviteExpired: 'outline',
+  NotInvited: 'outline',
+  Inactive: 'destructive',
 }

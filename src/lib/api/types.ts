@@ -216,3 +216,53 @@ export interface VideoUploadResponse {
   videoId: string
   title: string
 }
+
+export type CustomerStatus = 'Active' | 'Invited' | 'InviteExpired' | 'NotInvited' | 'Inactive'
+
+export interface CustomerListParams {
+  q?: string
+  status?: CustomerStatus
+  page?: number
+  pageSize?: number
+}
+
+export interface CustomerListItemResponse {
+  id: number
+  fullName: string
+  email?: string | null
+  phone?: string | null
+  facebookName?: string | null
+  status: CustomerStatus
+  invitedAt?: string | null
+  activatedAt?: string | null
+  lastLoginAt?: string | null
+  createdAt: string
+  courseCount: number
+  lessonCount: number
+}
+
+export interface CustomerDetailResponse {
+  id: number
+  fullName: string
+  email?: string | null
+  phone?: string | null
+  facebookName?: string | null
+  facebookProfileUrl?: string | null
+  note?: string | null
+  isActive: boolean
+  status: CustomerStatus
+  invitedAt?: string | null
+  inviteExpiresAt?: string | null
+  activatedAt?: string | null
+  lastLoginAt?: string | null
+  createdAt: string
+}
+
+export interface CustomerRequest {
+  fullName: string
+  email: string | null
+  phone: string | null
+  facebookName: string | null
+  facebookProfileUrl: string | null
+  note: string | null
+}

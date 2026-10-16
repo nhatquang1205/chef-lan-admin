@@ -91,7 +91,7 @@ Implement in order; each plan leaves the app building and usable.
 | 09 | [Uploads: video upload with progress, image upload for video thumbnails](plans/09-uploads.md) | done |
 | 10 | [Logo](plans/10-logo.md) | todo |
 | 11 | [Categories](plans/11-categories.md) | done |
-| 12 | [Customers: list, detail, edit, deactivate](plans/12-customers.md) — needs backend B2 | todo |
+| 12 | [Customers: list, detail, edit, deactivate](plans/12-customers.md) — needs backend B2 | done |
 | 13 | [Customer invitations](plans/13-customer-invites.md) — needs backend B3 | todo |
 | 14 | [Customer access: grant / revoke courses and lessons](plans/14-customer-access.md) | todo |
 
