@@ -44,3 +44,19 @@ pnpm dlx shadcn@latest add switch dialog
 - Recipes Markdown with a table previews as a table and round-trips unchanged.
 - Delete a lesson → gone, counts updated.
 - `pnpm build` / `pnpm lint` clean. Mark 07 `done`.
+
+## Implementation notes
+
+- Added `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`, `react-markdown`, `remark-gfm`; shadcn `switch` (`dialog` already existed, not overwritten). Raw HTML in Markdown stays disabled (react-markdown default).
+- API (`lib/api/lessons.ts`): `listLessons(courseId)`, `getLesson(id)`, `createLesson(courseId, body)`, `updateLesson(id, body)`, `deleteLesson(id, courseId)`,
+  `reorderLessons(courseId, ids)`. Create/update/delete invalidate `['lessons', courseId]`, `['course', courseId]`, `['courses']`; create/update also `setQueryData(['lesson', id])`.
+  `reorderLessons` does not invalidate; `LessonList` does it after the call. Keys: `['lessons', courseId]`, `['lesson', id]` (numeric ids).
+- Reusable for Plan 08: `components/SortableList.tsx` (`items: {id:number}[]`, `onReorder(nextItems)`, `renderItem(item, index, handle)` where `handle` is the drag-handle button to place in the row;
+  pointer + keyboard sensors) and `components/Markdown.tsx`. `LessonList.tsx` shows the optimistic pattern: `setQueryData` with the new order, send the full id list, toast on error
+  (`order.mismatch` -> "Danh sách bài học đã thay đổi, đã tải lại."), then always `invalidateQueries` so the server order wins.
+- Routes: `/courses/:courseId/lessons/new` (`LessonCreatePage`) and `/courses/:courseId/lessons/:lessonId` (`LessonPage`). `LessonPage` loads `['lesson', id]` and `['course', courseId]` (breadcrumb),
+  renders header (badges, delete menu, `ConfirmDialog`) and `<LessonForm key={lesson.id} courseId lesson />` inside a `max-w-3xl flex flex-col gap-6` div; Plan 08 adds its videos section as a sibling
+  below the form in that div. A lesson whose `courseId` differs from the URL shows not-found. Breadcrumb/back links go to `/courses/:id?tab=lessons`.
+- `LessonForm`: validation in a zod schema (add-on requires price, recipes <= 100000, http(s) URL); server field errors are mapped onto fields. Empty description/recipes/resourcesUrl are sent as `null`;
+  recipes is otherwise sent unaltered (no trimming). The included -> add-on confirmation is shown on submit (not on toggling the switch). The "Xem trước" toggle swaps the textarea for the rendered Markdown (form value is kept).
+- Not exercised in a browser; only build and lint were run.

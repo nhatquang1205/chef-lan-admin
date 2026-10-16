@@ -19,6 +19,7 @@ import { ApiError } from '@/lib/api/client'
 import { deleteCourse, getCourse, publishCourse, unpublishCourse } from '@/lib/api/courses'
 import { messageFor } from '@/lib/api/errors'
 import { COURSE_STATUS_LABEL, COURSE_STATUS_VARIANT, formatDate, formatDuration } from '@/lib/format'
+import LessonList from '@/features/lessons/LessonList'
 import CourseForm from './CourseForm'
 
 const PUBLIC_SITE_URL = (import.meta.env.VITE_PUBLIC_SITE_URL ?? '').replace(/\/+$/, '')
@@ -134,7 +135,7 @@ export default function CoursePage() {
           <CourseForm key={course.id} course={course} />
         </TabsContent>
         <TabsContent value="lessons" className="pt-4">
-          <EmptyState title="Quản lý bài học sẽ có ở bước tiếp theo." />
+          <LessonList courseId={course.id} />
         </TabsContent>
       </Tabs>
       <ConfirmDialog
