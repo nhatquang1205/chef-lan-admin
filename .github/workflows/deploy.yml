@@ -1,0 +1,92 @@
+name: CI / Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Never let two deploys race onto the same box; a PR check may be cancelled by a newer push.
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # reads the pnpm version from package.json "packageManager"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      # VITE_* values are inlined at build time. VITE_API_BASE_URL stays empty: nginx serves the
+      # admin and proxies /api/ on the same host, so the browser calls the API same-origin.
+      - run: pnpm build
+        env:
+          VITE_API_BASE_URL: ''
+          VITE_PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  deploy:
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_PORT: ${{ secrets.VPS_PORT || '22' }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      ADMIN_URL: ${{ vars.ADMIN_URL }}
+      DEPLOY_DIR: /var/www/chef-lan-admin
+      RELEASE: ${{ github.sha }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Load SSH key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "$VPS_PORT" -H "$VPS_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+
+      # Each deploy goes to its own release folder; `current` is switched with an atomic rename, so
+      # nginx never serves a half-copied site. The last 5 releases are kept for a quick rollback.
+      - name: Upload release
+        run: |
+          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" "mkdir -p '$DEPLOY_DIR/releases/$RELEASE'"
+          rsync -az --delete -e "ssh -p $VPS_PORT" dist/ "$VPS_USER@$VPS_HOST:$DEPLOY_DIR/releases/$RELEASE/"
+
+      - name: Switch current release
+        run: |
+          ssh -p "$VPS_PORT" "$VPS_USER@$VPS_HOST" bash -s -- "$DEPLOY_DIR" "$RELEASE" <<'SCRIPT'
+          set -euo pipefail
+          dir="$1"; release="$2"
+          test -f "$dir/releases/$release/index.html"
+          touch "$dir/releases/$release"
+          ln -sfn "releases/$release" "$dir/current.tmp"
+          mv -Tf "$dir/current.tmp" "$dir/current"
+          cd "$dir/releases" && ls -1t | tail -n +6 | xargs -r rm -rf
+          echo "Now serving $release"
+          SCRIPT
+
+      - name: Health check
+        if: env.ADMIN_URL != ''
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -fsS "$ADMIN_URL/" | grep -q '<div id="root">'; then echo "OK"; exit 0; fi
+            sleep 3
+          done
+          echo "Admin site did not answer with the app at $ADMIN_URL" >&2
+          exit 1

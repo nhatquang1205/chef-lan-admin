@@ -48,6 +48,12 @@ then `make run`. The seeded admin is `admin@cheflan.local`; its password is the 
 - Keep it simple: no global state library, no generated API client, no SSR, no tests framework unless a plan
   asks for one.
 
+## Deployment
+
+Static files only: `.github/workflows/deploy.yml` builds, rsyncs `dist/` to the VPS and flips a `current` symlink;
+nginx (`deploy/nginx.conf`) serves the admin subdomain and proxies `/api/` to the API on the same host, so
+`VITE_API_BASE_URL` is empty in production. Setup steps: `deploy/README.md`.
+
 ## Things that bite
 
 - **PUT replaces the whole resource** (course, lesson, video). Always send every field from the loaded

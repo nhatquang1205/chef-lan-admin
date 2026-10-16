@@ -17,7 +17,7 @@ CRUD and staff management are **not in scope yet** (categories are only read, fo
 | Forms | `react-hook-form` + `zod` (`@hookform/resolvers`) |
 | Toasts / reorder | `sonner` / `@dnd-kit/core` + `@dnd-kit/sortable` |
 | Auth | Staff login against `/api/v1/admins/auth/*`; tokens in `localStorage`; single-flight refresh, coordinated across tabs |
-| Production hosting | **Own subdomain** (e.g. `admin.<domain>`), static files from nginx. Deploy is a later plan (see "Later") |
+| Production hosting | **Own subdomain** (e.g. `admin.<domain>`), static files from nginx, which also proxies `/api/` to the API on the same host (same-origin, no CORS). See `deploy/README.md` |
 | API base URL | `VITE_API_BASE_URL` (origin, no `/api`). Empty = same origin; in dev the Vite proxy forwards `/api` to `:5059` |
 
 ## API reference (what the plans use)
@@ -90,10 +90,11 @@ Implement in order; each plan leaves the app building and usable.
 | 08 | [Lesson videos: list, reorder, create / edit, delete](plans/08-lesson-videos.md) | done |
 | 09 | [Uploads: video upload with progress, image upload for video thumbnails](plans/09-uploads.md) | done |
 
+## Deployment
+
+GitHub Actions (`.github/workflows/deploy.yml`) builds and rsyncs `dist/` to `/var/www/chef-lan-admin/releases/<sha>` and
+switches `current`; nginx config and the one-time setup are in `deploy/`. `VITE_API_BASE_URL` stays empty in production.
+
 ## Later (not planned yet)
 
-- **Deploy to the subdomain**: GitHub Actions build → static files on the VPS, nginx server block with SPA
-  fallback (`try_files $uri /index.html`), TLS. Needs the **backend** to allow the admin origin:
-  `Cors__AllowedOrigins__N=https://admin.<domain>` in `~/chef-lan/.env` on the VPS, and
-  `VITE_API_BASE_URL=https://<api domain>` at build time.
 - Categories CRUD, customers, access grants (enrollments), staff management.
