@@ -66,4 +66,3 @@ Layout/navigation (Plan 03). Staff management.
   single `apply()` that sets state and the ref together. Signing out also clears the query cache.
 - A forced refresh after a 401 passes the rejected token; inside the lock a stored, still-fresh token that differs
   from it is reused instead of calling the API again.
-- `App.tsx` has a placeholder home (greeting, change-password link, logout) until Plan 03 adds the shell.

@@ -29,3 +29,19 @@ Real course data (Plan 04).
 - Layout works at 375 px width (menu in a sheet, no horizontal scroll).
 - `/courses` shows a placeholder page using `PageHeader` and `EmptyState`.
 - `pnpm build` / `pnpm lint` clean. Mark 03 `done`.
+
+## Implementation notes
+
+- No shadcn `sidebar`: a plain `<aside>` (desktop, `md:` and up) plus `sheet` (mobile) and `dropdown-menu`. Added shadcn
+  components: `sheet`, `dropdown-menu`, `avatar`, `breadcrumb`, `alert-dialog`, `skeleton`, `separator`. No new npm libraries.
+- `AppLayout` (`components/AppLayout.tsx`) is the route element for everything behind `RequireAuth`. When
+  `user.mustChangePassword` it renders only `<Outlet />`, so the forced change-password screen stays full-page; otherwise
+  `/change-password` sits inside the shell. Nav items are the `NAV_ITEMS` array at the top of the file.
+- `PageHeader` props: `title`, `description?`, `breadcrumb?: { label; to? }[]` (last item without `to` = current page), `actions?: ReactNode`.
+- `components/states.tsx`: `LoadingState({ rows? })`, `ErrorState({ error, onRetry? })`, `EmptyState({ title, description?, action? })`.
+- `ConfirmDialog` (default export) props: `open`, `onOpenChange`, `title`, `description?`, `confirmLabel?`, `destructive?`,
+  `onConfirm: () => Promise<unknown>`. It is controlled; on a rejected `onConfirm` it stays open and toasts `messageFor(error)`.
+- `VndInput` (default export) props: `value: number | null`, `onChange(number | null)`, plus normal input props (`id`, `aria-invalid`, ...).
+  Shows `550.000` with a "₫" suffix; strips non-digits, max 12 digits. Wire to react-hook-form via `Controller`.
+- `useUnsavedChangesPrompt(dirty: boolean)` in `lib/useUnsavedChangesPrompt.ts`: `beforeunload` only, no router blocking.
+- `features/courses/CoursesPage.tsx` is a placeholder for Plan 04 to replace. `ChangePasswordPage` min height changed to `70svh` to fit the shell.
