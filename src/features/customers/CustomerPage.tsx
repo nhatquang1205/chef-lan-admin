@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { Lock, LockOpen } from 'lucide-react'
+import { Lock, LockOpen, Mail } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { toast } from 'sonner'
@@ -9,7 +9,7 @@ import { EmptyState, ErrorState, LoadingState } from '@/components/states'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api/client'
-import { deactivateCustomer, getCustomer, reactivateCustomer } from '@/lib/api/customers'
+import { deactivateCustomer, getCustomer, inviteCustomer, reactivateCustomer } from '@/lib/api/customers'
 import { messageFor } from '@/lib/api/errors'
 import { CUSTOMER_STATUS_LABEL, CUSTOMER_STATUS_VARIANT, formatDateTime } from '@/lib/format'
 import CustomerForm from './CustomerForm'
@@ -18,6 +18,8 @@ export default function CustomerPage() {
   const id = Number(useParams().id)
   const valid = Number.isInteger(id) && id > 0
   const [confirmLock, setConfirmLock] = useState(false)
+  const [confirmInvite, setConfirmInvite] = useState(false)
+  const [inviting, setInviting] = useState(false)
   const [unlocking, setUnlocking] = useState(false)
   const { data: customer, error, isPending, refetch } = useQuery({
     queryKey: ['customer', id],
@@ -38,6 +40,26 @@ export default function CustomerPage() {
     toast.success('Đã khóa tài khoản.')
   }
 
+  const sendInvite = async () => {
+    await inviteCustomer(customer.id)
+    toast.success('Đã gửi email mời.')
+  }
+
+  const handleInvite = async () => {
+    if (customer.status === 'NotInvited') {
+      setInviting(true)
+      try {
+        await sendInvite()
+      } catch (err) {
+        toast.error(messageFor(err))
+      } finally {
+        setInviting(false)
+      }
+    } else {
+      setConfirmInvite(true)
+    }
+  }
+
   const handleUnlock = async () => {
     setUnlocking(true)
     try {
@@ -50,8 +72,11 @@ export default function CustomerPage() {
     }
   }
 
+  const canInvite = ['NotInvited', 'Invited', 'InviteExpired'].includes(customer.status)
+
   const dates = [
     customer.invitedAt && `Mời ${formatDateTime(customer.invitedAt)}`,
+    customer.status === 'Invited' && customer.inviteExpiresAt && `Hết hạn ${formatDateTime(customer.inviteExpiresAt)}`,
     customer.activatedAt && `Kích hoạt ${formatDateTime(customer.activatedAt)}`,
     customer.lastLoginAt && `Đăng nhập gần nhất ${formatDateTime(customer.lastLoginAt)}`,
   ].filter(Boolean)
@@ -65,7 +90,18 @@ export default function CustomerPage() {
         actions={
           <>
             <Badge variant={CUSTOMER_STATUS_VARIANT[customer.status]}>{CUSTOMER_STATUS_LABEL[customer.status]}</Badge>
-            {/* Plan 13: invite / resend invite button goes here. */}
+            {canInvite && (
+              <span title={customer.email ? undefined : 'Cần email để mời'}>
+                <Button
+                  variant={customer.status === 'InviteExpired' ? 'default' : 'outline'}
+                  disabled={!customer.email || inviting}
+                  onClick={() => void handleInvite()}
+                >
+                  <Mail />
+                  {customer.status === 'NotInvited' ? 'Gửi lời mời' : 'Gửi lại lời mời'}
+                </Button>
+              </span>
+            )}
             {customer.isActive ? (
               <Button variant="outline" onClick={() => setConfirmLock(true)}>
                 <Lock />
@@ -85,6 +121,14 @@ export default function CustomerPage() {
         <CustomerForm key={`${customer.id}:${customer.status}`} customer={customer} />
         {/* Plan 14: the customer's course / lesson access section goes here, below the form. */}
       </div>
+      <ConfirmDialog
+        open={confirmInvite}
+        onOpenChange={setConfirmInvite}
+        title="Gửi lại lời mời?"
+        description="Liên kết cũ sẽ không dùng được nữa."
+        confirmLabel="Gửi lại"
+        onConfirm={sendInvite}
+      />
       <ConfirmDialog
         open={confirmLock}
         onOpenChange={setConfirmLock}

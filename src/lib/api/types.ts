@@ -253,6 +253,7 @@ export interface CustomerDetailResponse {
   status: CustomerStatus
   invitedAt?: string | null
   inviteExpiresAt?: string | null
+  inviteError?: string | null
   activatedAt?: string | null
   lastLoginAt?: string | null
   createdAt: string
@@ -265,4 +266,10 @@ export interface CustomerRequest {
   facebookName: string | null
   facebookProfileUrl: string | null
   note: string | null
+  sendInvite?: boolean
+}
+
+export interface InviteResponse {
+  invitedAt: string
+  inviteExpiresAt: string
 }

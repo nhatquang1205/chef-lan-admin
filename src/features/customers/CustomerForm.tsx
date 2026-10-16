@@ -2,12 +2,13 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,6 +43,7 @@ const schema = z.object({
     .max(500, 'Tối đa 500 ký tự.')
     .refine((v) => v === '' || isHttpUrl(v), 'Đường dẫn phải bắt đầu bằng http:// hoặc https://.'),
   note: z.string().max(2000, 'Tối đa 2000 ký tự.'),
+  sendInvite: z.boolean(),
 })
 
 type FormValues = z.infer<typeof schema>
@@ -54,12 +56,13 @@ function toValues(customer?: CustomerDetailResponse): FormValues {
     facebookName: customer?.facebookName ?? '',
     facebookProfileUrl: customer?.facebookProfileUrl ?? '',
     note: customer?.note ?? '',
+    sendInvite: !customer,
   }
 }
 
 const orNull = (value: string) => (value.trim() === '' ? null : value.trim())
 
-function toRequest(values: FormValues): CustomerRequest {
+function toRequest(values: FormValues, isNew: boolean): CustomerRequest {
   return {
     fullName: values.fullName.trim(),
     email: orNull(values.email),
@@ -67,6 +70,7 @@ function toRequest(values: FormValues): CustomerRequest {
     facebookName: orNull(values.facebookName),
     facebookProfileUrl: orNull(values.facebookProfileUrl),
     note: orNull(values.note),
+    ...(isNew && { sendInvite: values.sendInvite && values.email.trim() !== '' }),
   }
 }
 
@@ -104,8 +108,11 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
     handleSubmit,
     setError,
     reset,
+    control,
     formState: { errors, isDirty },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: toValues(customer) })
+
+  const hasEmail = (useWatch({ control, name: 'email' }) ?? '').trim() !== ''
 
   useUnsavedChangesPrompt(isDirty)
 
@@ -134,13 +141,15 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
       if (!mapped) toast.error(messageFor(error))
       return
     }
-    toast.success('Đã lưu')
+    if (saved.inviteError) toast.warning('Đã tạo khách hàng nhưng chưa gửi được email mời')
+    else if (!customer && input.sendInvite) toast.success('Đã tạo khách hàng và gửi email mời')
+    else toast.success('Đã lưu')
     reset(toValues(saved))
     if (!customer) navigate(`/customers/${saved.id}`, { replace: true })
   }
 
   const onSubmit = async (values: FormValues) => {
-    const input = toRequest(values)
+    const input = toRequest(values, !customer)
     if (emailChangeWarning(customer, input.email)) {
       setPending(input)
       return
@@ -182,6 +191,23 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
           <Field label="Ghi chú" htmlFor="note" error={errors.note?.message}>
             <Textarea id="note" rows={4} aria-invalid={!!errors.note} {...register('note')} />
           </Field>
+          {!customer && (
+            <Controller
+              control={control}
+              name="sendInvite"
+              render={({ field }) => (
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="sendInvite"
+                    checked={field.value && hasEmail}
+                    disabled={!hasEmail}
+                    onCheckedChange={(checked) => field.onChange(checked === true)}
+                  />
+                  <Label htmlFor="sendInvite">Gửi email mời ngay</Label>
+                </div>
+              )}
+            />
+          )}
         </CardContent>
       </Card>
 

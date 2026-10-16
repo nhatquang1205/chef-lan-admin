@@ -21,3 +21,10 @@
 With SMTP configured on the local API: create a customer with your own email and "Gửi email mời ngay" → the mail
 arrives and the status is "Đã mời"; resend → the new mail works and the old link does not; after activating on the
 website the status becomes "Đã kích hoạt" and the button disappears. `pnpm build` / `pnpm lint` clean.
+
+## Implementation notes
+
+- `inviteCustomer(id)` in `lib/api/customers.ts` (invalidates `['customers']` and `['customer', id]`), `InviteResponse` and `inviteError` / `sendInvite` in `types.ts`, four error codes in `errors.ts`.
+- `CustomerForm` (create only): checkbox "Gửi email mời ngay", checked by default, disabled and unchecked while the email is empty; sends `sendInvite`. If the response has `inviteError`, a warning toast is shown; the user lands on the detail page either way.
+- `CustomerPage` header: "Gửi lời mời" (NotInvited, immediate), "Gửi lại lời mời" (Invited / InviteExpired, with confirm "Liên kết cũ sẽ không dùng được nữa."; highlighted as the primary button when expired); hidden for Active / Inactive. No email: disabled, tooltip via `title` on a wrapping span (no tooltip component installed). "Hết hạn {date}" is appended to the dates line only while status is Invited.
+- Only build and lint were run; not exercised in a browser or against SMTP.

@@ -5,6 +5,7 @@ import type {
   CustomerListItemResponse,
   CustomerListParams,
   CustomerRequest,
+  InviteResponse,
   PagedResult,
 } from './types'
 
@@ -52,4 +53,10 @@ export async function deactivateCustomer(id: number) {
 export async function reactivateCustomer(id: number) {
   await adminFetch(`${BASE}/${id}/reactivate`, { method: 'POST' })
   await invalidateCustomers(id)
+}
+
+export async function inviteCustomer(id: number) {
+  const result = await adminFetch<InviteResponse>(`${BASE}/${id}/invite`, { method: 'POST' })
+  await invalidateCustomers(id)
+  return result
 }
