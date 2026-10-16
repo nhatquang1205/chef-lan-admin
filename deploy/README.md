@@ -1,6 +1,6 @@
 # Deploying chef-lan-admin to the VPS
 
-The admin is a static site. GitHub Actions lints and builds it, copies `dist/` to the VPS with rsync, and
+The admin is a static site on its own domain (not a subdomain of the customer site). GitHub Actions lints and builds it, copies `dist/` to the VPS with rsync, and
 switches a `current` symlink. nginx serves the files on the admin's own hostname and forwards `/api/` to the
 API container on the same host, so the browser calls the API same-origin (no CORS change in the API).
 
@@ -15,9 +15,9 @@ No Node process and no port of its own on the VPS.
 
 Run as the deploy user (the same one chef-lan-web and wish-list use).
 
-1. **Hostname.** Pick the admin hostname and point it at the VPS. With DuckDNS, every sub-subdomain already
-   resolves to your IP, e.g. `admin.<yourname>.duckdns.org`; check with `dig +short <admin-domain>`.
-   With your own domain, add an `A` record `admin` -> VPS IP.
+1. **Domain.** At the admin domain's DNS provider, add an `A` record for the domain itself (`@`, and `www` if you
+   want it) pointing to the VPS IP. Wait until `dig +short <admin-domain>` prints that IP. (A free DuckDNS name
+   such as `<name>.duckdns.org` works the same way until the real domain exists.)
 2. **rsync** (the workflow uploads with it): `rsync --version || sudo apt install -y rsync`
 3. **Web root owned by the deploy user** (nginx only needs to read it):
    ```bash

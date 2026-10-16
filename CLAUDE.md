@@ -51,7 +51,7 @@ then `make run`. The seeded admin is `admin@cheflan.local`; its password is the 
 ## Deployment
 
 Static files only: `.github/workflows/deploy.yml` builds, rsyncs `dist/` to the VPS and flips a `current` symlink;
-nginx (`deploy/nginx.conf`) serves the admin subdomain and proxies `/api/` to the API on the same host, so
+nginx (`deploy/nginx.conf`) serves the admin on its own domain and proxies `/api/` to the API on the same host, so
 `VITE_API_BASE_URL` is empty in production. Setup steps: `deploy/README.md`.
 
 ## Things that bite

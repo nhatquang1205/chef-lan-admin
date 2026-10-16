@@ -17,7 +17,7 @@ CRUD and staff management are **not in scope yet** (categories are only read, fo
 | Forms | `react-hook-form` + `zod` (`@hookform/resolvers`) |
 | Toasts / reorder | `sonner` / `@dnd-kit/core` + `@dnd-kit/sortable` |
 | Auth | Staff login against `/api/v1/admins/auth/*`; tokens in `localStorage`; single-flight refresh, coordinated across tabs |
-| Production hosting | **Own subdomain** (e.g. `admin.<domain>`), static files from nginx, which also proxies `/api/` to the API on the same host (same-origin, no CORS). See `deploy/README.md` |
+| Production hosting | **Its own domain** (separate from the customer site), static files from nginx, which also proxies `/api/` to the API on the same host (same-origin, no CORS). See `deploy/README.md` |
 | API base URL | `VITE_API_BASE_URL` (origin, no `/api`). Empty = same origin; in dev the Vite proxy forwards `/api` to `:5059` |
 
 ## API reference (what the plans use)
