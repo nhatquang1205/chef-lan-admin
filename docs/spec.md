@@ -80,7 +80,7 @@ Implement in order; each plan leaves the app building and usable.
 
 | # | Plan | Status |
 |---|---|---|
-| 01 | [Foundations: router, query client, API client, types](plans/01-foundations.md) | todo |
+| 01 | [Foundations: router, query client, API client, types](plans/01-foundations.md) | done |
 | 02 | [Staff auth: login, session, refresh, guard, change password](plans/02-auth.md) | todo |
 | 03 | [App shell: layout, navigation, shared UI states](plans/03-app-shell.md) | todo |
 | 04 | [Course list](plans/04-course-list.md) | todo |

@@ -1,11 +1,10 @@
-import { Button } from '@/components/ui/button'
+import { Route, Routes } from 'react-router'
 
-// Placeholder until Phase 1 adds routing, login and the app shell (docs/plans/).
 export default function App() {
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-4">
-      <h1 className="text-2xl font-semibold">Bon Bocon — Quản trị</h1>
-      <Button>Bắt đầu</Button>
-    </main>
+    <Routes>
+      <Route path="/" element={<main className="p-6 text-2xl font-semibold">Trang chủ</main>} />
+      <Route path="*" element={<main className="p-6 text-2xl font-semibold">Không tìm thấy trang</main>} />
+    </Routes>
   )
 }

@@ -49,3 +49,10 @@ Login, layout, any resource screens.
 - `pnpm dev`: `/` renders the placeholder, `/whatever` renders the Vietnamese 404.
 - In the browser console of the dev app, `fetch('/api/v1/categories')` returns 200 through the proxy (backend running).
 - Mark 01 `done` in `docs/spec.md`.
+
+## Implementation notes
+
+- Used `sonner` directly (not the shadcn wrapper). Installed: react-router 8.4.0, @tanstack/react-query 5.104.3, sonner 2.0.8.
+- `types.ts` also has `CategoryResponse`, request/param types (`LoginRequest`, `CourseListParams`, order requests) for later plans.
+- `messageFor` also covers codes beyond the spec (`upload.*`, `category.not_found`, `lesson*.not_found`, `order.mismatch`) and maps a bare 409 to a "reload" message.
+- The "Done when" `fetch('/api/v1/categories')` proxy check was not run (needs the backend and a browser).
