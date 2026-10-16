@@ -17,6 +17,7 @@ import {
 import { ApiError } from '@/lib/api/client'
 import { getCourse } from '@/lib/api/courses'
 import { deleteLesson, getLesson } from '@/lib/api/lessons'
+import VideoList from '@/features/videos/VideoList'
 import LessonForm from './LessonForm'
 
 export default function LessonPage() {
@@ -84,6 +85,7 @@ export default function LessonPage() {
       />
       <div className="flex max-w-3xl flex-col gap-6">
         <LessonForm key={lesson.id} courseId={courseId} lesson={lesson} />
+        <VideoList lessonId={lesson.id} courseId={courseId} />
       </div>
       <ConfirmDialog
         open={confirmDelete}

@@ -31,3 +31,20 @@
 - The public course page (`../chef-lan-web`, or `GET /api/v1/courses/{slug}`) shows the videos in the new order
   once the course is published.
 - `pnpm build` / `pnpm lint` clean. Mark 08 `done`.
+
+## Implementation notes
+
+- No new shadcn components or npm libraries (`dialog`, `select`, `switch`, `badge` already existed). The form is in a `Dialog`.
+- Files: `lib/api/videos.ts` (`listVideos`, `getVideo`, `createVideo(lessonId, courseId, body)`, `updateVideo(id, courseId, body)`, `deleteVideo(id, lessonId, courseId)`,
+  `reorderVideos`, `invalidateAfterVideoChange(lessonId, courseId)` which invalidates `['videos', lessonId]`, `['lesson', lessonId]`, `['lessons', courseId]`, `['course', courseId]`, `['courses']`),
+  `features/videos/VideoList.tsx` (section on `LessonPage`, sibling below `LessonForm`; props `lessonId`, `courseId`; list + dialog + delete confirm), `features/videos/VideoForm.tsx`.
+  `lib/format.ts` gained `formatClock(seconds)` -> `mm:ss`, `parseClock(text)` (`mm:ss` or `h:mm:ss`, empty = 0, malformed = null) and `VIDEO_PROVIDER_LABEL`.
+- Reorder is optimistic like lessons; the courses/lessons aggregates are not touched by reorder.
+- Request shape: Bunny sends `externalId` and `url: null`; YouTube/Vimeo/Cdn/Facebook send `url` and `externalId: null`; `None` sends neither (switching provider in the form clears the hidden field on save).
+  `freeTillSeconds` is sent only while `isFree`; it must be an integer > 0 and, when the duration is known, < duration. Server field names `durationSeconds`, `freeTillSeconds`, `source` are mapped onto the form fields.
+- Not exercised in a browser; only build and lint were run.
+- **For Plan 09:** `VideoForm` (default export; props `lessonId`, `courseId`, `video?`, `onSaved`, `onCancel`) uses react-hook-form with string-typed fields: `externalId` (Bunny id), `thumbnailUrl`, `duration` (the
+  `mm:ss` string), `title`. Both the `externalId` and `thumbnailUrl` inputs sit in a `<div className="flex gap-2">` with the `Input` as `flex-1`, ready for an upload button next to it. Edit `VideoForm` directly and
+  set values with `setValue('externalId', videoId, { shouldDirty: true, shouldValidate: true })`, `setValue('thumbnailUrl', url, { shouldDirty: true })` and
+  `setValue('duration', formatClock(seconds), { shouldDirty: true })` (destructure `setValue` from `useForm`). The dialog is in `VideoList`; an upload in progress should block closing it / submit. The upload
+  response only gives `videoId` and `title` (no duration), so the admin still types the duration.

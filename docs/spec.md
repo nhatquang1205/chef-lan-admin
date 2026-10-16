@@ -87,7 +87,7 @@ Implement in order; each plan leaves the app building and usable.
 | 05 | [Course create / edit form](plans/05-course-form.md) | done |
 | 06 | [Course actions: publish, unpublish, delete](plans/06-course-actions.md) | done |
 | 07 | [Lessons: list, reorder, create / edit, delete](plans/07-lessons.md) | done |
-| 08 | [Lesson videos: list, reorder, create / edit, delete](plans/08-lesson-videos.md) | todo |
+| 08 | [Lesson videos: list, reorder, create / edit, delete](plans/08-lesson-videos.md) | done |
 | 09 | [Uploads: video upload with progress, image upload for video thumbnails](plans/09-uploads.md) | todo |
 
 ## Later (not planned yet)

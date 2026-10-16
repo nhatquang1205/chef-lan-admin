@@ -1,4 +1,4 @@
-import type { CourseLevel, CourseStatus } from '@/lib/api/types'
+import type { CourseLevel, CourseStatus, VideoProvider } from '@/lib/api/types'
 
 const vndFormat = new Intl.NumberFormat('vi-VN')
 
@@ -36,4 +36,28 @@ export const COURSE_STATUS_VARIANT: Record<CourseStatus, 'default' | 'secondary'
   Draft: 'secondary',
   Published: 'default',
   Archived: 'outline',
+}
+
+export function formatClock(seconds: number): string {
+  const total = Math.max(0, Math.round(seconds))
+  const minutes = Math.floor(total / 60)
+  return `${String(minutes).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
+// Accepts "mm:ss" or "h:mm:ss"; returns null when malformed. Empty is 0.
+export function parseClock(value: string): number | null {
+  const text = value.trim()
+  if (text === '') return 0
+  const match = /^(?:(\d+):)?(\d+):([0-5]?\d)$/.exec(text)
+  if (!match) return null
+  return Number(match[1] ?? 0) * 3600 + Number(match[2]) * 60 + Number(match[3])
+}
+
+export const VIDEO_PROVIDER_LABEL: Record<VideoProvider, string> = {
+  Bunny: 'Bunny',
+  YouTube: 'YouTube',
+  Vimeo: 'Vimeo',
+  Cdn: 'CDN',
+  Facebook: 'Facebook',
+  None: 'Không có',
 }
