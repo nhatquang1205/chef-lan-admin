@@ -3,8 +3,8 @@
 ## Context
 
 Chef Lan's staff currently manage course content with Postman against the backend (`../chef-lan`). This app
-replaces that for **courses, lessons and lesson videos**. Customers, enrollments/access grants, categories
-CRUD and staff management are **not in scope yet** (categories are only read, for the course form).
+replaces that for **courses, lessons and lesson videos** (plans 01–09), then **categories, customers, invitations and
+access grants** (plans 10–14). Staff management is not in scope yet.
 
 ## Decisions
 
@@ -89,6 +89,14 @@ Implement in order; each plan leaves the app building and usable.
 | 07 | [Lessons: list, reorder, create / edit, delete](plans/07-lessons.md) | done |
 | 08 | [Lesson videos: list, reorder, create / edit, delete](plans/08-lesson-videos.md) | done |
 | 09 | [Uploads: video upload with progress, image upload for video thumbnails](plans/09-uploads.md) | done |
+| 10 | [Logo](plans/10-logo.md) | todo |
+| 11 | [Categories](plans/11-categories.md) | todo |
+| 12 | [Customers: list, detail, edit, deactivate](plans/12-customers.md) — needs backend B2 | todo |
+| 13 | [Customer invitations](plans/13-customer-invites.md) — needs backend B3 | todo |
+| 14 | [Customer access: grant / revoke courses and lessons](plans/14-customer-access.md) | todo |
+
+Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
+invitations). 10 and 11 need no backend change and can be done first.
 
 ## Deployment
 
@@ -97,4 +105,4 @@ switches `current`; nginx config and the one-time setup are in `deploy/`. `VITE_
 
 ## Later (not planned yet)
 
-- Categories CRUD, customers, access grants (enrollments), staff management.
+- Staff management.
