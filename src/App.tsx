@@ -5,7 +5,7 @@ import ChangePasswordPage from '@/features/auth/ChangePasswordPage'
 import LoginPage from '@/features/auth/LoginPage'
 import CoursesPage from '@/features/courses/CoursesPage'
 import CourseCreatePage from '@/features/courses/CourseCreatePage'
-import CourseEditPage from '@/features/courses/CourseEditPage'
+import CoursePage from '@/features/courses/CoursePage'
 
 export default function App() {
   return (
@@ -16,7 +16,7 @@ export default function App() {
           <Route path="/" element={<Navigate to="/courses" replace />} />
           <Route path="/courses" element={<CoursesPage />} />
           <Route path="/courses/new" element={<CourseCreatePage />} />
-          <Route path="/courses/:id" element={<CourseEditPage />} />
+          <Route path="/courses/:id" element={<CoursePage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Route>

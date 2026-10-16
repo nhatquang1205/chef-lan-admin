@@ -57,3 +57,24 @@ export async function updateCourse(id: number, input: CourseInput) {
   queryClient.setQueryData(['course', id], course)
   return course
 }
+
+async function afterStatusChange(id: number) {
+  await queryClient.invalidateQueries({ queryKey: ['courses'] })
+  await queryClient.invalidateQueries({ queryKey: ['course', id] })
+}
+
+export async function publishCourse(id: number) {
+  await adminFetch(`/api/v1/admins/courses/${id}/publish`, { method: 'POST' })
+  await afterStatusChange(id)
+}
+
+export async function unpublishCourse(id: number) {
+  await adminFetch(`/api/v1/admins/courses/${id}/unpublish`, { method: 'POST' })
+  await afterStatusChange(id)
+}
+
+export async function deleteCourse(id: number) {
+  await adminFetch(`/api/v1/admins/courses/${id}`, { method: 'DELETE' })
+  queryClient.removeQueries({ queryKey: ['course', id] })
+  await queryClient.invalidateQueries({ queryKey: ['courses'] })
+}

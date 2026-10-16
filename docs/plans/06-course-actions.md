@@ -24,3 +24,17 @@
 - A course with a published lesson and playable video publishes; the badge and list update; "Ẩn khóa học" reverts it.
 - Delete removes it from the list; its URL then shows the not-found state.
 - `pnpm build` / `pnpm lint` clean. Mark 06 `done`.
+
+## Implementation notes
+
+- Added shadcn `tabs`. `CourseEditPage.tsx` was renamed to `CoursePage.tsx` (route `/courses/:id` in `App.tsx`).
+- API (`lib/api/courses.ts`): `publishCourse(id)`, `unpublishCourse(id)`, `deleteCourse(id)`. Publish/unpublish invalidate `['courses']`
+  and `['course', id]`; delete removes `['course', id]` and invalidates `['courses']`. Publish is idempotent on the backend (204 if already published).
+- The two publish error messages in `lib/api/errors.ts` were reworded to the Plan 06 text. Publish errors show as a toast; the course stays Draft.
+- Tab state is `?tab=lessons`; the default tab (`info`) leaves the URL clean. Tab changes use `replace`.
+- `VITE_PUBLIC_SITE_URL` (in `.env.example`) builds `${origin}/courses/${slug}`; the "Xem trên trang" button shows only when Published and the variable is set.
+- A 404 from `getCourse` renders a not-found state with a link to `/courses` (no retries for 404).
+- Not exercised in a browser; only build and lint were run.
+- **For Plan 07:** replace the placeholder `EmptyState` inside `<TabsContent value="lessons">` in `CoursePage.tsx` with the lessons component. After lesson
+  or video changes, invalidate `['course', courseId]` (lessonCount/duration in the header) and `['courses']` (list shows counts); lesson or video
+  changes can also change whether the course may be published.
