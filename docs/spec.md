@@ -1,0 +1,99 @@
+# Admin web — spec
+
+## Context
+
+Chef Lan's staff currently manage course content with Postman against the backend (`../chef-lan`). This app
+replaces that for **courses, lessons and lesson videos**. Customers, enrollments/access grants, categories
+CRUD and staff management are **not in scope yet** (categories are only read, for the course form).
+
+## Decisions
+
+| | |
+|---|---|
+| App type | Vite + React + TypeScript SPA, built to static files (`dist/`) |
+| UI | shadcn/ui (`radix-nova`) + Tailwind v4, Vietnamese text only |
+| Routing | `react-router` (declarative `<BrowserRouter>` / `<Routes>`) |
+| Server state | `@tanstack/react-query` |
+| Forms | `react-hook-form` + `zod` (`@hookform/resolvers`) |
+| Toasts / reorder | `sonner` / `@dnd-kit/core` + `@dnd-kit/sortable` |
+| Auth | Staff login against `/api/v1/admins/auth/*`; tokens in `localStorage`; single-flight refresh, coordinated across tabs |
+| Production hosting | **Own subdomain** (e.g. `admin.<domain>`), static files from nginx. Deploy is a later plan (see "Later") |
+| API base URL | `VITE_API_BASE_URL` (origin, no `/api`). Empty = same origin; in dev the Vite proxy forwards `/api` to `:5059` |
+
+## API reference (what the plans use)
+
+All admin endpoints need `Authorization: Bearer <staff access token>`. Enums are strings. Money is integer VND.
+
+**Auth** (`/api/v1/admins/auth`)
+- `POST /login` `{ email, password }` → `StaffAuthResponse { accessToken, accessTokenExpiresAt, refreshToken, user: StaffResponse }`
+- `POST /refresh` `{ refreshToken }` → `StaffAuthResponse` (rotates: the old refresh token dies; reusing it revokes all sessions)
+- `POST /logout` `{ refreshToken }` → 204
+- `POST /change-password` `{ currentPassword, newPassword }` → 204, revokes all refresh tokens (log in again)
+- `GET /api/v1/admins/me` → `StaffResponse { id, email, displayName, role, jobTitle?, mustChangePassword }`
+- Errors: `identity.invalid_credentials` (401), `identity.account_locked`, `identity.account_inactive`,
+  `identity.invalid_refresh_token`, `identity.current_password_incorrect`. Login is rate limited (5/min): 429.
+
+**Categories** (read only here)
+- `GET /api/v1/admins/categories?status=&q=` → `CategoryAdminResponse[] { id, name, slug, description?, thumbnailUrl?, displayOrder, status: "Active"|"InActive" }`
+
+**Courses** (`/api/v1/admins/courses`)
+- `GET ?status=Draft|Published|Archived&q=&categorySlug=&level=&sort=Newest|PriceAsc|PriceDesc|Title&page=1&pageSize=12`
+  → `PagedResult<CourseListItemResponse> { items, page, pageSize, totalCount, totalPages, hasPrevious, hasNext }`;
+  item = `{ id, slug, title, subtitle?, thumbnailUrl?, level, status, publishedAt?, priceVnd, compareAtPriceVnd?, priceDisplay, lessonCount, totalDurationSeconds, accessDurationDays?, categories: CategoryResponse[] }`
+- `GET /{id}` → `CourseAdminDetailResponse { id, slug, title, subtitle?, description?, whatYouWillLearn?, metaDescription?, thumbnailUrl?, promoVideoUrl?, level, status, publishedAt?, priceVnd, compareAtPriceVnd?, currency, accessDurationDays?, lessonCount, totalDurationSeconds, enrollmentCount, legacyFacebookGroupUrl?, categories }`
+- `POST` / `PUT /{id}` — JSON `CourseRequest { title, subtitle?, description?, whatYouWillLearn?, metaDescription?, thumbnailUrl?, promoVideoUrl?, priceVnd, compareAtPriceVnd?, accessDurationDays?, legacyFacebookGroupUrl?, categoryIds?, level }`
+  **or** `multipart/form-data` with the same fields plus `thumbnailFile` (JPEG/PNG/WebP ≤ 5 MB) instead of
+  `thumbnailUrl` (both = 400 `course.thumbnail_conflict`); `categoryIds` repeated once per id. 201 / 200 with the detail.
+  PUT replaces everything: omitted thumbnail = cleared. `compareAtPriceVnd >= priceVnd`. Unknown category: 400 `course.unknown_categories`.
+- `DELETE /{id}` → 204 (soft delete)
+- `POST /{id}/publish` → 204, or 409 `course.no_published_lesson` / `course.no_playable_video`
+- `POST /{id}/unpublish` → 204 (back to Draft)
+- Server-owned (never sent): slug, status, publishedAt, currency, counters.
+
+**Lessons**
+- `GET /api/v1/admins/courses/{courseId}/lessons` → `LessonAdminListItemResponse[] { id, courseId, slug, title, sortOrder, isPublished, priceVnd?, includedInCourse, videoCount, durationSeconds }`
+- `POST /api/v1/admins/courses/{courseId}/lessons` · `PUT /api/v1/admins/lessons/{id}` — `LessonRequest { title, description?, recipes?, resourcesUrl?, isPublished = true, priceVnd?, includedInCourse = true }`
+  → `LessonAdminDetailResponse` (list item fields + `description?, recipes?, resourcesUrl?`). `recipes` is Markdown.
+  `includedInCourse: false` (add-on, bought separately) **requires** `priceVnd`.
+- `GET /api/v1/admins/lessons/{id}` · `DELETE /api/v1/admins/lessons/{id}` (204)
+- `PUT /api/v1/admins/courses/{courseId}/lessons/order` `{ lessonIds: [...] }` → 204, all live lessons exactly once, else 400 `order.mismatch`
+
+**Lesson videos**
+- `GET /api/v1/admins/lessons/{lessonId}/videos` → `LessonVideoAdminResponse[] { id, lessonId, publicId, sortOrder, title, description?, provider, externalId?, url?, thumbnailUrl?, durationSeconds, isFree, freeTillSeconds?, isPublished }`
+- `POST /api/v1/admins/lessons/{lessonId}/videos` · `PUT /api/v1/admins/lesson-videos/{id}` — `LessonVideoRequest { title, description?, externalId?, url?, thumbnailUrl?, durationSeconds, isFree, freeTillSeconds?, provider = "Bunny", isPublished = true }`
+  Rules: `freeTillSeconds` only when `isFree`, and > 0; a published video needs `externalId` or `url` (unless provider `None`).
+  Providers: `None, YouTube, Vimeo, Cdn, Facebook, Bunny` (Bunny is the normal one: `externalId` = Bunny video id).
+- `GET /api/v1/admins/lesson-videos/{id}` · `DELETE /api/v1/admins/lesson-videos/{id}` (204)
+- `PUT /api/v1/admins/lessons/{lessonId}/videos/order` `{ videoIds: [...] }` → 204
+
+**Uploads** (`/api/v1/admins/uploads`)
+- `POST /images` multipart field `file` (JPEG/PNG/WebP ≤ 5 MB) → `{ url }`
+- `POST /videos` multipart fields `title` (first) then `file` (≤ 8 GB, streamed) → `{ videoId, title }`; put `videoId` into a video's `externalId`.
+- Errors: `upload.*` (`unsupported_image`, `image_too_large`, `video_host_not_configured` 503, ...).
+
+**Errors**: `ProblemDetails { title, status, detail?, code? , errors? }`; validation 400 has
+`errors: { "PriceVnd": ["..."] }` (PascalCase keys). 409 also comes from concurrent edits.
+
+## Plans
+
+Implement in order; each plan leaves the app building and usable.
+
+| # | Plan | Status |
+|---|---|---|
+| 01 | [Foundations: router, query client, API client, types](plans/01-foundations.md) | todo |
+| 02 | [Staff auth: login, session, refresh, guard, change password](plans/02-auth.md) | todo |
+| 03 | [App shell: layout, navigation, shared UI states](plans/03-app-shell.md) | todo |
+| 04 | [Course list](plans/04-course-list.md) | todo |
+| 05 | [Course create / edit form](plans/05-course-form.md) | todo |
+| 06 | [Course actions: publish, unpublish, delete](plans/06-course-actions.md) | todo |
+| 07 | [Lessons: list, reorder, create / edit, delete](plans/07-lessons.md) | todo |
+| 08 | [Lesson videos: list, reorder, create / edit, delete](plans/08-lesson-videos.md) | todo |
+| 09 | [Uploads: video upload with progress, image upload for video thumbnails](plans/09-uploads.md) | todo |
+
+## Later (not planned yet)
+
+- **Deploy to the subdomain**: GitHub Actions build → static files on the VPS, nginx server block with SPA
+  fallback (`try_files $uri /index.html`), TLS. Needs the **backend** to allow the admin origin:
+  `Cors__AllowedOrigins__N=https://admin.<domain>` in `~/chef-lan/.env` on the VPS, and
+  `VITE_API_BASE_URL=https://<api domain>` at build time.
+- Categories CRUD, customers, access grants (enrollments), staff management.
