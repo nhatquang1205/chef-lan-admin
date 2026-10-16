@@ -12,3 +12,11 @@
 ## Done when
 
 The logo shows in the sidebar, the mobile menu, the login page and the browser tab; `pnpm build` / `pnpm lint` clean.
+
+## Implementation notes
+
+- `public/logo.png` (640x640, 269 KB) is the source copy; the UI uses `public/logo-128.png` (19 KB) so no page loads the full
+  file. `public/logo-64.png` (6 KB) is the favicon (`index.html`, `type="image/png"`). All made with `sips`.
+- `public/favicon.svg` was the Vite template logo, not the brand, so it was deleted.
+- Logo shown in `Brand()` and the mobile sheet title (32px, `rounded-md`), on `LoginPage` (72px, header text centred) and on
+  `ChangePasswordPage` only in the forced-change state (`user.mustChangePassword`); inside the shell the page has no logo.

@@ -41,8 +41,11 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 
 function Brand() {
   return (
-    <Link to="/courses" className="font-heading text-base font-semibold">
-      Bon Bocon <span className="font-normal text-muted-foreground">— Quản trị</span>
+    <Link to="/courses" className="flex items-center gap-2 font-heading text-base font-semibold">
+      <img src="/logo-128.png" alt="" width={32} height={32} className="size-8 rounded-md" />
+      <span>
+        Bon Bocon <span className="font-normal text-muted-foreground">— Quản trị</span>
+      </span>
     </Link>
   )
 }
@@ -103,7 +106,10 @@ export default function AppLayout() {
               </SheetTrigger>
               <SheetContent side="left">
                 <SheetHeader>
-                  <SheetTitle>Bon Bocon — Quản trị</SheetTitle>
+                  <SheetTitle className="flex items-center gap-2">
+                    <img src="/logo-128.png" alt="" width={32} height={32} className="size-8 rounded-md" />
+                    Bon Bocon — Quản trị
+                  </SheetTitle>
                   <SheetDescription className="sr-only">Menu điều hướng</SheetDescription>
                 </SheetHeader>
                 <div className="px-4">

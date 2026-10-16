@@ -47,7 +47,8 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-svh items-center justify-center p-4">
       <Card className="w-full max-w-sm">
-        <CardHeader>
+        <CardHeader className="text-center">
+          <img src="/logo-128.png" alt="" width={72} height={72} className="mx-auto mb-2 size-[72px] rounded-xl" />
           <CardTitle className="text-xl">Bon Bocon Admin</CardTitle>
           <CardDescription>Đăng nhập bằng tài khoản nhân viên.</CardDescription>
         </CardHeader>
