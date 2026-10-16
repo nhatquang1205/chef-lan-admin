@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
-import { Badge } from '@/components/ui/badge'
+import StatusBadge from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -81,7 +81,7 @@ export default function CoursePage() {
         description={`/${course.slug}`}
         actions={
           <>
-            <Badge variant={COURSE_STATUS_VARIANT[course.status]}>{COURSE_STATUS_LABEL[course.status]}</Badge>
+            <StatusBadge variant={COURSE_STATUS_VARIANT[course.status]}>{COURSE_STATUS_LABEL[course.status]}</StatusBadge>
             {published && PUBLIC_SITE_URL && (
               <Button variant="outline" asChild>
                 <a href={`${PUBLIC_SITE_URL}/courses/${course.slug}`} target="_blank" rel="noreferrer">

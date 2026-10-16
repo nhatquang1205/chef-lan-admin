@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel from '@/components/FieldLabel'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import VndInput from '@/components/VndInput'
@@ -140,7 +140,7 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
       </Tabs>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="grant-course-search">Khóa học</Label>
+        <FieldLabel htmlFor="grant-course-search" required>Khóa học</FieldLabel>
         <Input
           id="grant-course-search"
           placeholder="Tìm khóa học..."
@@ -171,7 +171,7 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
 
       {mode === 'lesson' && course && (
         <div className="flex flex-col gap-2">
-          <Label>Bài học</Label>
+          <FieldLabel required>Bài học</FieldLabel>
           <div className="max-h-44 overflow-y-auto rounded-md border">
             {lessons.isPending ? (
               <p className="p-3 text-sm text-muted-foreground">Đang tải...</p>
@@ -199,24 +199,24 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
 
       <div className="flex items-center gap-3">
         <Switch id="grant-paid" checked={isPaid} onCheckedChange={togglePaid} />
-        <Label htmlFor="grant-paid">Đã thanh toán</Label>
+        <FieldLabel htmlFor="grant-paid">Đã thanh toán</FieldLabel>
       </div>
 
       {isPaid && (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="grant-amount">Số tiền đã thanh toán</Label>
+          <FieldLabel htmlFor="grant-amount">Số tiền đã thanh toán</FieldLabel>
           <VndInput id="grant-amount" value={amount} onChange={setAmount} aria-invalid={!!errors.amountPaidVnd} />
           {errors.amountPaidVnd && <p className="text-sm text-destructive">{errors.amountPaidVnd}</p>}
         </div>
       )}
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="grant-note">Ghi chú thanh toán</Label>
+        <FieldLabel htmlFor="grant-note">Ghi chú thanh toán</FieldLabel>
         <Input id="grant-note" maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} />
         {errors.paymentNote && <p className="text-sm text-destructive">{errors.paymentNote}</p>}
       </div>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="grant-reference">Mã tham chiếu</Label>
+        <FieldLabel htmlFor="grant-reference">Mã tham chiếu</FieldLabel>
         <Input id="grant-reference" maxLength={100} value={reference} onChange={(e) => setReference(e.target.value)} />
         {errors.paymentReference && <p className="text-sm text-destructive">{errors.paymentReference}</p>}
       </div>

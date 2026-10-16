@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
-import { Badge } from '@/components/ui/badge'
+import StatusBadge from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -65,8 +65,8 @@ export default function LessonPage() {
         description={`/${lesson.slug}`}
         actions={
           <>
-            {!lesson.isPublished && <Badge variant="secondary">Nháp</Badge>}
-            {!lesson.includedInCourse && <Badge variant="outline">Mua thêm</Badge>}
+            {!lesson.isPublished && <StatusBadge variant="secondary">Nháp</StatusBadge>}
+            {!lesson.includedInCourse && <StatusBadge variant="outline">Mua thêm</StatusBadge>}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon" aria-label="Thao tác khác">

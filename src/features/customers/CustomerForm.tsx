@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel from '@/components/FieldLabel'
 import { Textarea } from '@/components/ui/textarea'
 import { ApiError } from '@/lib/api/client'
 import { createCustomer, updateCustomer } from '@/lib/api/customers'
@@ -74,7 +74,8 @@ function toRequest(values: FormValues, isNew: boolean): CustomerRequest {
   }
 }
 
-function Field({ label, htmlFor, error, children }: {
+function Field({ label, htmlFor, error, required, children }: {
+  required?: boolean
   label: string
   htmlFor: string
   error?: string
@@ -82,7 +83,7 @@ function Field({ label, htmlFor, error, children }: {
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <FieldLabel htmlFor={htmlFor} required={required}>{label}</FieldLabel>
       {children}
       {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
@@ -164,7 +165,7 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
           <CardTitle>Thông tin</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Field label="Họ tên" htmlFor="fullName" error={errors.fullName?.message}>
+          <Field label="Họ tên" required htmlFor="fullName" error={errors.fullName?.message}>
             <Input id="fullName" aria-invalid={!!errors.fullName} {...register('fullName')} />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -203,7 +204,7 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
                     disabled={!hasEmail}
                     onCheckedChange={(checked) => field.onChange(checked === true)}
                   />
-                  <Label htmlFor="sendInvite">Gửi email mời ngay</Label>
+                  <FieldLabel htmlFor="sendInvite">Gửi email mời ngay</FieldLabel>
                 </div>
               )}
             />

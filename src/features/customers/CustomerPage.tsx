@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
-import { Badge } from '@/components/ui/badge'
+import StatusBadge from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { ApiError } from '@/lib/api/client'
 import { deactivateCustomer, getCustomer, inviteCustomer, reactivateCustomer } from '@/lib/api/customers'
@@ -90,7 +90,7 @@ export default function CustomerPage() {
         description={customer.email ?? 'Chưa có email'}
         actions={
           <>
-            <Badge variant={CUSTOMER_STATUS_VARIANT[customer.status]}>{CUSTOMER_STATUS_LABEL[customer.status]}</Badge>
+            <StatusBadge variant={CUSTOMER_STATUS_VARIANT[customer.status]}>{CUSTOMER_STATUS_LABEL[customer.status]}</StatusBadge>
             {canInvite && (
               <span title={customer.email ? undefined : 'Cần email để mời'}>
                 <Button

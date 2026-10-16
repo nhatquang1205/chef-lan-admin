@@ -8,7 +8,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel from '@/components/FieldLabel'
 import { adminFetch } from '@/lib/api/admin'
 import { fieldErrors, messageFor } from '@/lib/api/errors'
 import { useAuth } from '@/lib/auth/context'
@@ -73,17 +73,17 @@ export default function ChangePasswordPage() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="currentPassword">Mật khẩu hiện tại</Label>
+              <FieldLabel htmlFor="currentPassword" required>Mật khẩu hiện tại</FieldLabel>
               <Input id="currentPassword" type="password" autoComplete="current-password" {...register('currentPassword')} />
               {errors.currentPassword && <p className="text-sm text-destructive">{errors.currentPassword.message}</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="newPassword">Mật khẩu mới</Label>
+              <FieldLabel htmlFor="newPassword" required>Mật khẩu mới</FieldLabel>
               <Input id="newPassword" type="password" autoComplete="new-password" {...register('newPassword')} />
               {errors.newPassword && <p className="text-sm text-destructive">{errors.newPassword.message}</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="confirmPassword">Nhập lại mật khẩu mới</Label>
+              <FieldLabel htmlFor="confirmPassword" required>Nhập lại mật khẩu mới</FieldLabel>
               <Input id="confirmPassword" type="password" autoComplete="new-password" {...register('confirmPassword')} />
               {errors.confirmPassword && <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>}
             </div>

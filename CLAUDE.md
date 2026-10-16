@@ -45,6 +45,12 @@ then `make run`. The seeded admin is `admin@cheflan.local`; its password is the 
   Validation failures (400) also carry `errors: { Field: [messages] }` with **PascalCase** field names. Map
   them onto form fields; show other errors in a toast. Never show raw English server messages when a
   Vietnamese one exists for that `code` (see `src/lib/api/errors.ts` once Plan 01 lands).
+- **Required fields** show a red asterisk: use `FieldLabel` (`src/components/FieldLabel.tsx`, `required` prop) instead of
+  `Label`, derived from the zod schema (mark conditional requirements only while they apply). Form `Field` helpers
+  forward a `required` prop to it.
+- **Heights:** buttons, inputs and selects all use the shadcn default (`h-8`); do not mix `size="sm"`/`lg` with
+  neighbours (`sm` is for table-row and inline helper buttons). Status badges in page headers next to buttons use
+  `StatusBadge` (`src/components/StatusBadge.tsx`, h-8); table and list badges stay the small `Badge`.
 - Keep it simple: no global state library, no generated API client, no SSR, no tests framework unless a plan
   asks for one.
 

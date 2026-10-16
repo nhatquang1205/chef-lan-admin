@@ -15,7 +15,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel from '@/components/FieldLabel'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { createCategory, updateCategory } from '@/lib/api/categories'
@@ -167,20 +167,20 @@ function CategoryForm({ category, onDone }: { category?: CategoryAdminResponse |
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
       <div className="flex flex-col gap-2">
-        <Label htmlFor="category-name">Tên danh mục</Label>
+        <FieldLabel htmlFor="category-name" required>Tên danh mục</FieldLabel>
         <Input id="category-name" aria-invalid={!!errors.name} {...register('name')} />
         {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="category-description">Mô tả</Label>
+        <FieldLabel htmlFor="category-description">Mô tả</FieldLabel>
         <Textarea id="category-description" rows={3} {...register('description')} />
         {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="category-order">Thứ tự hiển thị</Label>
+          <FieldLabel htmlFor="category-order">Thứ tự hiển thị</FieldLabel>
           <Input
             id="category-order"
             inputMode="numeric"
@@ -191,8 +191,8 @@ function CategoryForm({ category, onDone }: { category?: CategoryAdminResponse |
           {errors.displayOrder && <p className="text-sm text-destructive">{errors.displayOrder.message}</p>}
         </div>
         <div className="flex flex-col gap-2">
-          <Label htmlFor="category-active">Hiển thị trên trang web</Label>
-          <div className="flex h-9 items-center">
+          <FieldLabel htmlFor="category-active">Hiển thị trên trang web</FieldLabel>
+          <div className="flex h-8 items-center">
             <Controller
               control={control}
               name="active"
@@ -205,7 +205,7 @@ function CategoryForm({ category, onDone }: { category?: CategoryAdminResponse |
       </div>
 
       <div className="flex flex-col gap-3">
-        <Label>Ảnh danh mục</Label>
+        <FieldLabel>Ảnh danh mục</FieldLabel>
         <div className="flex flex-wrap items-start gap-4">
           <div className="flex aspect-video w-40 items-center justify-center overflow-hidden rounded-lg border bg-muted text-muted-foreground">
             {preview ? <img src={preview} alt="Ảnh danh mục" className="size-full object-cover" /> : <ImageOff className="size-6" />}

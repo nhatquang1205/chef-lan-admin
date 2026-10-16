@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel, { RequiredMark } from '@/components/FieldLabel'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
@@ -126,8 +126,9 @@ function FieldError({ message }: { message?: string }) {
   return message ? <p className="text-sm text-destructive">{message}</p> : null
 }
 
-function Field({ label, htmlFor, hint, error, children }: {
+function Field({ label, htmlFor, hint, error, required, children }: {
   label: string
+  required?: boolean
   htmlFor?: string
   hint?: string
   error?: string
@@ -135,7 +136,7 @@ function Field({ label, htmlFor, hint, error, children }: {
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <FieldLabel htmlFor={htmlFor} required={required}>{label}</FieldLabel>
       {children}
       {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
       <FieldError message={error} />
@@ -341,12 +342,15 @@ export default function CourseForm({ course }: { course?: CourseAdminDetailRespo
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6" noValidate>
+      <p className="-mb-3 text-xs text-muted-foreground">
+        <RequiredMark /> bắt buộc
+      </p>
       <Card>
         <CardHeader>
           <CardTitle>Thông tin chung</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Field label="Tên khóa học" htmlFor="title" error={errors.title?.message}>
+          <Field label="Tên khóa học" required htmlFor="title" error={errors.title?.message}>
             <Input id="title" aria-invalid={!!errors.title} {...register('title')} />
           </Field>
           <Field label="Mô tả ngắn" htmlFor="subtitle" error={errors.subtitle?.message}>
@@ -374,7 +378,7 @@ export default function CourseForm({ course }: { course?: CourseAdminDetailRespo
           <CardTitle>Giá và thời hạn</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
-          <Field label="Giá bán" htmlFor="priceVnd" error={errors.priceVnd?.message}>
+          <Field label="Giá bán" required htmlFor="priceVnd" error={errors.priceVnd?.message}>
             <Controller
               control={control}
               name="priceVnd"

@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel from '@/components/FieldLabel'
 import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
@@ -104,8 +104,9 @@ function toRequest(values: FormValues): LessonVideoRequest {
   }
 }
 
-function Field({ label, htmlFor, hint, error, children }: {
+function Field({ label, htmlFor, hint, error, required, children }: {
   label: string
+  required?: boolean
   htmlFor?: string
   hint?: string
   error?: string
@@ -113,7 +114,7 @@ function Field({ label, htmlFor, hint, error, children }: {
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <FieldLabel htmlFor={htmlFor} required={required}>{label}</FieldLabel>
       {children}
       {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -143,6 +144,7 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
 
   const provider = useWatch({ control, name: 'provider' })
   const isFree = useWatch({ control, name: 'isFree' })
+  const isPublished = useWatch({ control, name: 'isPublished' })
   const thumbnailUrl = useWatch({ control, name: 'thumbnailUrl' })
 
   const [progress, setProgress] = useState<number | null>(null)
@@ -258,7 +260,7 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
 
   return (
     <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4" noValidate>
-      <Field label="Tên video" htmlFor="video-title" error={errors.title?.message}>
+      <Field label="Tên video" required htmlFor="video-title" error={errors.title?.message}>
         <Input id="video-title" aria-invalid={!!errors.title} {...register('title')} />
       </Field>
       <Field label="Mô tả" htmlFor="video-description" error={errors.description?.message}>
@@ -285,7 +287,7 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
         />
       </Field>
       {provider === 'Bunny' && (
-        <Field label="Mã video Bunny" htmlFor="video-externalId" error={errors.externalId?.message}>
+        <Field label="Mã video Bunny" required={isPublished} htmlFor="video-externalId" error={errors.externalId?.message}>
           <div className="flex gap-2">
             <Input id="video-externalId" className="flex-1" aria-invalid={!!errors.externalId} {...register('externalId')} />
             <input
@@ -312,7 +314,7 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
         </Field>
       )}
       {provider !== 'Bunny' && provider !== 'None' && (
-        <Field label="Đường dẫn video" htmlFor="video-url" error={errors.url?.message}>
+        <Field label="Đường dẫn video" required={isPublished} htmlFor="video-url" error={errors.url?.message}>
           <Input id="video-url" placeholder="https://..." aria-invalid={!!errors.url} {...register('url')} />
         </Field>
       )}
@@ -350,7 +352,7 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
         render={({ field }) => (
           <div className="flex items-center gap-3">
             <Switch id="video-isFree" checked={field.value} onCheckedChange={field.onChange} />
-            <Label htmlFor="video-isFree">Cho xem miễn phí</Label>
+            <FieldLabel htmlFor="video-isFree">Cho xem miễn phí</FieldLabel>
           </div>
         )}
       />
@@ -376,7 +378,7 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
         render={({ field }) => (
           <div className="flex items-center gap-3">
             <Switch id="video-isPublished" checked={field.value} onCheckedChange={field.onChange} />
-            <Label htmlFor="video-isPublished">Hiển thị</Label>
+            <FieldLabel htmlFor="video-isPublished">Hiển thị</FieldLabel>
           </div>
         )}
       />

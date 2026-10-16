@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel from '@/components/FieldLabel'
 import { messageFor } from '@/lib/api/errors'
 import { useAuth } from '@/lib/auth/context'
 
@@ -55,12 +55,12 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
+              <FieldLabel htmlFor="email" required>Email</FieldLabel>
               <Input id="email" type="email" autoComplete="username" autoFocus {...register('email')} />
               {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <FieldLabel htmlFor="password" required>Mật khẩu</FieldLabel>
               <div className="relative">
                 <Input
                   id="password"

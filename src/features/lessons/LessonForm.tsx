@@ -12,7 +12,7 @@ import VndInput from '@/components/VndInput'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import FieldLabel from '@/components/FieldLabel'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { fieldErrors, messageFor } from '@/lib/api/errors'
@@ -75,8 +75,9 @@ function toRequest(values: FormValues): LessonRequest {
   }
 }
 
-function Field({ label, htmlFor, hint, error, children }: {
+function Field({ label, htmlFor, hint, error, required, children }: {
   label: string
+  required?: boolean
   htmlFor?: string
   hint?: string
   error?: string
@@ -84,7 +85,7 @@ function Field({ label, htmlFor, hint, error, children }: {
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <Label htmlFor={htmlFor}>{label}</Label>
+      <FieldLabel htmlFor={htmlFor} required={required}>{label}</FieldLabel>
       {children}
       {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
       {error && <p className="text-sm text-destructive">{error}</p>}
@@ -157,7 +158,7 @@ export default function LessonForm({ courseId, lesson }: Props) {
             <CardTitle>Thông tin bài học</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <Field label="Tên bài học" htmlFor="title" error={errors.title?.message}>
+            <Field label="Tên bài học" required htmlFor="title" error={errors.title?.message}>
               <Input id="title" aria-invalid={!!errors.title} {...register('title')} />
             </Field>
             <Field label="Mô tả" htmlFor="description" error={errors.description?.message}>
@@ -203,7 +204,7 @@ export default function LessonForm({ courseId, lesson }: Props) {
               render={({ field }) => (
                 <div className="flex items-center gap-3">
                   <Switch id="isPublished" checked={field.value} onCheckedChange={field.onChange} />
-                  <Label htmlFor="isPublished">Hiển thị</Label>
+                  <FieldLabel htmlFor="isPublished">Hiển thị</FieldLabel>
                 </div>
               )}
             />
@@ -214,7 +215,7 @@ export default function LessonForm({ courseId, lesson }: Props) {
                 render={({ field }) => (
                   <div className="flex items-center gap-3">
                     <Switch id="includedInCourse" checked={field.value} onCheckedChange={field.onChange} />
-                    <Label htmlFor="includedInCourse">Nằm trong giá khóa học</Label>
+                    <FieldLabel htmlFor="includedInCourse">Nằm trong giá khóa học</FieldLabel>
                   </div>
                 )}
               />
@@ -225,6 +226,7 @@ export default function LessonForm({ courseId, lesson }: Props) {
             <div className="max-w-xs">
               <Field
                 label="Giá mua riêng"
+                required={!included}
                 htmlFor="priceVnd"
                 hint={included ? 'Để trống nếu không bán riêng bài này.' : undefined}
                 error={errors.priceVnd?.message}
