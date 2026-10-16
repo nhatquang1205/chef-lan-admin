@@ -83,7 +83,7 @@ Implement in order; each plan leaves the app building and usable.
 | 01 | [Foundations: router, query client, API client, types](plans/01-foundations.md) | done |
 | 02 | [Staff auth: login, session, refresh, guard, change password](plans/02-auth.md) | done |
 | 03 | [App shell: layout, navigation, shared UI states](plans/03-app-shell.md) | done |
-| 04 | [Course list](plans/04-course-list.md) | todo |
+| 04 | [Course list](plans/04-course-list.md) | done |
 | 05 | [Course create / edit form](plans/05-course-form.md) | todo |
 | 06 | [Course actions: publish, unpublish, delete](plans/06-course-actions.md) | todo |
 | 07 | [Lessons: list, reorder, create / edit, delete](plans/07-lessons.md) | todo |
