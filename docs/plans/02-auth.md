@@ -50,3 +50,20 @@ Layout/navigation (Plan 03). Staff management.
 - Logout in one tab signs the other tab out.
 - Visiting `/` signed out redirects to `/login?next=%2F`.
 - `pnpm build` / `pnpm lint` clean. Mark 02 `done`.
+
+## Implementation notes
+
+- `shadcn add form` produced nothing in the `radix-nova` registry; forms use `react-hook-form` + `zod` +
+  `@hookform/resolvers` directly with `label`/`input`. Added `react-hook-form`, `zod`, `@hookform/resolvers`.
+- Files: `lib/auth/session.ts` (storage + `storage` event + in-tab listeners), `lib/auth/token.ts`
+  (`getAccessToken`, `forceRefresh`, `signOutLocally`; single-flight promise + `navigator.locks`, re-reads storage inside
+  the lock, falls back to no lock if the API is missing), `lib/auth/context.ts` (context + `useAuth`),
+  `lib/auth/AuthProvider.tsx`, `lib/api/admin.ts` (`adminFetch`), `components/RequireAuth.tsx`, `features/auth/*`.
+- The stored session is read synchronously on first render, so `status` starts as `authenticated`/`anonymous`;
+  `loading` is kept in the type and handled by the guard but is not produced yet. `GET /admins/me` runs once in the
+  background to refresh `user`; a dead session is cleared by `adminFetch`, a network error keeps it.
+- Session changes (login, refresh, logout, other tabs) all flow through `saveSession` -> listeners -> the provider's
+  single `apply()` that sets state and the ref together. Signing out also clears the query cache.
+- A forced refresh after a 401 passes the rejected token; inside the lock a stored, still-fresh token that differs
+  from it is reused instead of calling the API again.
+- `App.tsx` has a placeholder home (greeting, change-password link, logout) until Plan 03 adds the shell.
