@@ -26,6 +26,7 @@ type Editing = { video?: LessonVideoResponse } | null
 export default function VideoList({ lessonId, courseId }: Props) {
   const queryKey = ['videos', lessonId]
   const [editing, setEditing] = useState<Editing>(null)
+  const [busy, setBusy] = useState(false)
   const [deleting, setDeleting] = useState<LessonVideoResponse | null>(null)
   const { data: videos, error, isPending, refetch } = useQuery({
     queryKey,
@@ -108,8 +109,8 @@ export default function VideoList({ lessonId, courseId }: Props) {
         Video không miễn phí chỉ xem được khi khách đã mua khóa học hoặc bài học.
       </p>
       {body}
-      <Dialog open={editing !== null} onOpenChange={(open) => !open && setEditing(null)}>
-        <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-xl">
+      <Dialog open={editing !== null} onOpenChange={(open) => !open && !busy && setEditing(null)}>
+        <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-xl" showCloseButton={!busy}>
           <DialogHeader>
             <DialogTitle>{editing?.video ? 'Sửa video' : 'Thêm video'}</DialogTitle>
             <DialogDescription className="sr-only">Thông tin video của bài học.</DialogDescription>
@@ -122,6 +123,7 @@ export default function VideoList({ lessonId, courseId }: Props) {
               video={editing.video}
               onSaved={() => setEditing(null)}
               onCancel={() => setEditing(null)}
+              onBusyChange={setBusy}
             />
           )}
         </DialogContent>

@@ -22,7 +22,7 @@ const MESSAGES: Record<string, string> = {
   'upload.image_too_large': 'Ảnh quá lớn (tối đa 5 MB).',
   'upload.image_storage_not_configured': 'Máy chủ chưa cấu hình nơi lưu ảnh.',
   'upload.storage_failed': 'Không lưu được ảnh. Vui lòng thử lại.',
-  'upload.video_host_not_configured': 'Máy chủ chưa cấu hình nơi lưu video.',
+  'upload.video_host_not_configured': 'Máy chủ chưa cấu hình Bunny.',
   'upload.video_host_failed': 'Tải video lên thất bại. Vui lòng thử lại.',
 }
 

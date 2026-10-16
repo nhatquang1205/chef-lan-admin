@@ -1,17 +1,21 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { Loader2 } from 'lucide-react'
+import { ImagePlus, Loader2, Upload } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Controller, useForm, useWatch } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { ApiError } from '@/lib/api/client'
 import { fieldErrors, messageFor } from '@/lib/api/errors'
 import type { LessonVideoRequest, LessonVideoResponse, VideoProvider } from '@/lib/api/types'
+import { readVideoDuration, UploadAbortedError, uploadImage, uploadVideo, validateImage } from '@/lib/api/uploads'
 import { createVideo, updateVideo } from '@/lib/api/videos'
 import { formatClock, parseClock, VIDEO_PROVIDER_LABEL } from '@/lib/format'
 
@@ -123,19 +127,104 @@ interface Props {
   video?: LessonVideoResponse
   onSaved: () => void
   onCancel: () => void
+  onBusyChange?: (busy: boolean) => void
 }
 
-export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel }: Props) {
+export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel, onBusyChange }: Props) {
   const {
     register,
     control,
     handleSubmit,
     setError,
+    setValue,
+    getValues,
     formState: { errors, isDirty },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: toValues(video) })
 
   const provider = useWatch({ control, name: 'provider' })
   const isFree = useWatch({ control, name: 'isFree' })
+  const thumbnailUrl = useWatch({ control, name: 'thumbnailUrl' })
+
+  const [progress, setProgress] = useState<number | null>(null)
+  const [imageUploading, setImageUploading] = useState(false)
+  const abortRef = useRef<AbortController | null>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  const uploading = progress !== null
+  const busy = uploading || imageUploading
+
+  useEffect(() => onBusyChange?.(busy), [busy, onBusyChange])
+
+  useEffect(() => {
+    if (!uploading) return
+    const handler = (e: BeforeUnloadEvent) => e.preventDefault()
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [uploading])
+
+  useEffect(() => () => abortRef.current?.abort(), [])
+
+  const startVideoUpload = async (file: File) => {
+    const title = getValues('title').trim() || file.name.replace(/\.[^.]+$/, '')
+    const controller = new AbortController()
+    abortRef.current = controller
+    setProgress(0)
+
+    const duration = await readVideoDuration(file)
+    if (duration !== null && getValues('duration').trim() === '') {
+      setValue('duration', formatClock(duration), { shouldDirty: true, shouldValidate: true })
+    }
+
+    try {
+      const result = await uploadVideo(file, title, { onProgress: setProgress, signal: controller.signal })
+      setValue('externalId', result.videoId, { shouldDirty: true, shouldValidate: true })
+      toast.success('Đã tải video lên. Bunny cần vài phút để xử lý.')
+    } catch (error) {
+      if (error instanceof UploadAbortedError) {
+        toast.info('Đã hủy tải video lên.')
+      } else if (error instanceof ApiError && error.status === 0) {
+        toast.error('Tải lên bị gián đoạn.')
+      } else {
+        toast.error(messageFor(error))
+      }
+    } finally {
+      abortRef.current = null
+      setProgress(null)
+    }
+  }
+
+  const cancelUpload = () => abortRef.current?.abort()
+
+  const startImageUpload = async (file: File) => {
+    const problem = validateImage(file)
+    if (problem) {
+      toast.error(problem)
+      return
+    }
+    setImageUploading(true)
+    try {
+      const { url } = await uploadImage(file)
+      setValue('thumbnailUrl', url, { shouldDirty: true, shouldValidate: true })
+    } catch (error) {
+      toast.error(messageFor(error))
+    } finally {
+      setImageUploading(false)
+    }
+  }
+
+  const takeFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    return file
+  }
+  const onVideoPicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = takeFile(e)
+    if (file) void startVideoUpload(file)
+  }
+  const onImagePicked = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = takeFile(e)
+    if (file) void startImageUpload(file)
+  }
 
   const save = useMutation({
     mutationFn: (request: LessonVideoRequest) =>
@@ -199,7 +288,27 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
         <Field label="Mã video Bunny" htmlFor="video-externalId" error={errors.externalId?.message}>
           <div className="flex gap-2">
             <Input id="video-externalId" className="flex-1" aria-invalid={!!errors.externalId} {...register('externalId')} />
+            <input
+              ref={videoInputRef}
+              type="file"
+              accept="video/*"
+              className="hidden"
+              onChange={onVideoPicked}
+            />
+            <Button type="button" variant="outline" disabled={uploading || save.isPending} onClick={() => videoInputRef.current?.click()}>
+              <Upload />
+              Tải video lên
+            </Button>
           </div>
+          {uploading && (
+            <div className="flex items-center gap-3">
+              <Progress value={progress} className="flex-1" />
+              <span className="w-10 text-right text-xs text-muted-foreground">{progress}%</span>
+              <Button type="button" variant="outline" size="sm" onClick={cancelUpload}>
+                Hủy
+              </Button>
+            </div>
+          )}
         </Field>
       )}
       {provider !== 'Bunny' && provider !== 'None' && (
@@ -216,7 +325,21 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
             aria-invalid={!!errors.thumbnailUrl}
             {...register('thumbnailUrl')}
           />
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            className="hidden"
+            onChange={onImagePicked}
+          />
+          <Button type="button" variant="outline" disabled={imageUploading} onClick={() => imageInputRef.current?.click()}>
+            {imageUploading ? <Loader2 className="animate-spin" /> : <ImagePlus />}
+            Tải ảnh lên
+          </Button>
         </div>
+        {isHttpUrl(thumbnailUrl.trim()) && (
+          <img src={thumbnailUrl.trim()} alt="" className="h-24 w-auto max-w-full self-start rounded-md border object-cover" />
+        )}
       </Field>
       <Field label="Thời lượng" htmlFor="video-duration" hint="Dạng mm:ss, ví dụ 12:30." error={errors.duration?.message}>
         <Input id="video-duration" className="max-w-40" placeholder="00:00" aria-invalid={!!errors.duration} {...register('duration')} />
@@ -258,10 +381,10 @@ export default function VideoForm({ lessonId, courseId, video, onSaved, onCancel
         )}
       />
       <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" disabled={save.isPending} onClick={onCancel}>
+        <Button type="button" variant="outline" disabled={save.isPending || uploading} onClick={onCancel}>
           Hủy
         </Button>
-        <Button type="submit" disabled={save.isPending || (!!video && !isDirty)}>
+        <Button type="submit" disabled={save.isPending || busy || (!!video && !isDirty)}>
           {save.isPending && <Loader2 className="animate-spin" />}
           {video ? 'Lưu thay đổi' : 'Thêm video'}
         </Button>
