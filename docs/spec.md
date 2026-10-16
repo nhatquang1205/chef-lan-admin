@@ -84,7 +84,7 @@ Implement in order; each plan leaves the app building and usable.
 | 02 | [Staff auth: login, session, refresh, guard, change password](plans/02-auth.md) | done |
 | 03 | [App shell: layout, navigation, shared UI states](plans/03-app-shell.md) | done |
 | 04 | [Course list](plans/04-course-list.md) | done |
-| 05 | [Course create / edit form](plans/05-course-form.md) | todo |
+| 05 | [Course create / edit form](plans/05-course-form.md) | done |
 | 06 | [Course actions: publish, unpublish, delete](plans/06-course-actions.md) | todo |
 | 07 | [Lessons: list, reorder, create / edit, delete](plans/07-lessons.md) | todo |
 | 08 | [Lesson videos: list, reorder, create / edit, delete](plans/08-lesson-videos.md) | todo |

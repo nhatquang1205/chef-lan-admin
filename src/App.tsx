@@ -4,7 +4,8 @@ import RequireAuth from '@/components/RequireAuth'
 import ChangePasswordPage from '@/features/auth/ChangePasswordPage'
 import LoginPage from '@/features/auth/LoginPage'
 import CoursesPage from '@/features/courses/CoursesPage'
-import PlaceholderPage from '@/features/courses/PlaceholderPage'
+import CourseCreatePage from '@/features/courses/CourseCreatePage'
+import CourseEditPage from '@/features/courses/CourseEditPage'
 
 export default function App() {
   return (
@@ -14,8 +15,8 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route path="/" element={<Navigate to="/courses" replace />} />
           <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/courses/new" element={<PlaceholderPage title="Thêm khóa học" />} />
-          <Route path="/courses/:id" element={<PlaceholderPage title="Chi tiết khóa học" />} />
+          <Route path="/courses/new" element={<CourseCreatePage />} />
+          <Route path="/courses/:id" element={<CourseEditPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Route>

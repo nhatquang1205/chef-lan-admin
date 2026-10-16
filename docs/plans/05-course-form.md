@@ -43,3 +43,25 @@ pnpm dlx shadcn@latest add textarea checkbox popover command form
 - `compareAtPriceVnd` below price, price `1.5`, empty title → inline Vietnamese errors, no request sent.
 - "Xóa ảnh" + save → thumbnail cleared.
 - `pnpm build` / `pnpm lint` clean. Mark 05 `done`.
+
+## Implementation notes
+
+- Added shadcn `textarea`, `checkbox`, `popover`, `command` (pulled in `dialog`, `input-group`; new npm dep `cmdk`). `form` does not exist in
+  this registry; plain react-hook-form + `Controller` as in Plan 02. `checkbox` is installed but unused.
+- Same URL, selected by `Content-Type`: `POST /admins/courses` and `PUT /admins/courses/{id}` have a JSON action and a multipart action.
+  `thumbnail.kind === 'file'` sends `FormData` (no manual Content-Type, the browser adds the boundary), anything else sends JSON.
+  Thumbnail sending: `none` -> JSON `thumbnailUrl: null` (clears it); `url` -> JSON `thumbnailUrl: "<url>"` (an unchanged thumbnail is
+  just the loaded URL as `kind: 'url'`); `file` -> multipart `thumbnailFile` with no `thumbnailUrl` field. Multipart omits null/empty
+  fields, appends `categoryIds` once per id, numbers as plain strings.
+- API (`lib/api/courses.ts`): `getCourse(id)`, `createCourse(input)`, `updateCourse(id, input)`, types `CourseInput`, `ThumbnailInput`. The
+  create/update functions invalidate `['courses']` and `setQueryData(['course', id], course)` themselves. Query key: `['course', id]` (number id).
+- Components: `features/courses/CourseForm.tsx` (default export, prop `course?: CourseAdminDetailResponse`; create when omitted -> navigates to
+  `/courses/:id` with `replace`; edit resets itself to the saved response). It renders no header; mount it with `key={course.id}`.
+  `CourseEditPage.tsx` (loads `['course', id]`, simple header: title, status badge, `/slug`, lessons/duration/enrollments/published date) and
+  `CourseCreatePage.tsx` are thin; `PlaceholderPage.tsx` was deleted. Plan 06 should wrap `CourseForm` in the tabs on `CourseEditPage`.
+- `COURSE_STATUS_VARIANT` moved from `CoursesPage.tsx` to `lib/format.ts` so the edit page can share it.
+- Save button is disabled while the edit form is clean; "Hủy thay đổi" resets to the loaded course.
+- Server 400 `errors` are mapped onto fields (`thumbnailUrl` -> the thumbnail field); if none maps, a toast is shown. Other errors -> toast.
+- `VndInput` strips non-digits, so a price of `1.5` cannot be typed (it becomes 15); the integer check in the schema is a backstop.
+- The unsaved-changes prompt is `beforeunload` only (Plan 03 hook), so in-app navigation is not blocked.
+- Not exercised in a browser; only build and lint were run.

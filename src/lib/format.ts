@@ -31,3 +31,9 @@ export const COURSE_LEVEL_LABEL: Record<CourseLevel, string> = {
   Intermediate: 'Trung cấp',
   Advanced: 'Nâng cao',
 }
+
+export const COURSE_STATUS_VARIANT: Record<CourseStatus, 'default' | 'secondary' | 'outline'> = {
+  Draft: 'secondary',
+  Published: 'default',
+  Archived: 'outline',
+}

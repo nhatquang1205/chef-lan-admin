@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { listCategories } from '@/lib/api/categories'
 import { listCourses } from '@/lib/api/courses'
 import type { CourseLevel, CourseListItemResponse, CourseListParams, CourseSortOrder, CourseStatus } from '@/lib/api/types'
-import { COURSE_LEVEL_LABEL, COURSE_STATUS_LABEL, formatDate, formatDuration, formatVnd } from '@/lib/format'
+import { COURSE_LEVEL_LABEL, COURSE_STATUS_LABEL, COURSE_STATUS_VARIANT, formatDate, formatDuration, formatVnd } from '@/lib/format'
 
 const PAGE_SIZE = 20
 const ALL = 'all'
@@ -23,12 +23,6 @@ const SORT_LABEL: Record<CourseSortOrder, string> = {
   PriceAsc: 'Giá tăng',
   PriceDesc: 'Giá giảm',
   Title: 'Tên',
-}
-
-const STATUS_VARIANT: Record<CourseStatus, 'default' | 'secondary' | 'outline'> = {
-  Draft: 'secondary',
-  Published: 'default',
-  Archived: 'outline',
 }
 
 function oneOf<T extends string>(value: string | null, allowed: readonly T[]): T | undefined {
@@ -77,7 +71,7 @@ function CourseRow({ course }: { course: CourseListItemResponse }) {
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant={STATUS_VARIANT[course.status]}>{COURSE_STATUS_LABEL[course.status]}</Badge>
+        <Badge variant={COURSE_STATUS_VARIANT[course.status]}>{COURSE_STATUS_LABEL[course.status]}</Badge>
       </TableCell>
       <TableCell>
         <div className="flex min-w-32 flex-wrap gap-1">
