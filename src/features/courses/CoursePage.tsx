@@ -131,7 +131,7 @@ export default function CoursePage() {
           <TabsTrigger value="info">Thông tin</TabsTrigger>
           <TabsTrigger value="lessons">Bài học</TabsTrigger>
         </TabsList>
-        <TabsContent value="info" className="max-w-3xl pt-4">
+        <TabsContent value="info" className="max-w-6xl pt-4">
           <CourseForm key={course.id} course={course} />
         </TabsContent>
         <TabsContent value="lessons" className="pt-4">

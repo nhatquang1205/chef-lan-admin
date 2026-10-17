@@ -14,17 +14,14 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Input } from '@/components/ui/input'
 import FieldLabel, { RequiredMark } from '@/components/FieldLabel'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { listCategories } from '@/lib/api/categories'
 import { createCourse, updateCourse, type CourseInput } from '@/lib/api/courses'
 import { fieldErrors, messageFor } from '@/lib/api/errors'
-import type { CourseAdminDetailResponse, CourseLevel } from '@/lib/api/types'
-import { COURSE_LEVEL_LABEL } from '@/lib/format'
+import type { CourseAdminDetailResponse } from '@/lib/api/types'
 import { useUnsavedChangesPrompt } from '@/lib/useUnsavedChangesPrompt'
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024
-const LEVELS = Object.keys(COURSE_LEVEL_LABEL) as CourseLevel[]
 
 const isHttpUrl = (value: string) => {
   try {
@@ -82,6 +79,8 @@ const schema = z
 
 type FormValues = z.infer<typeof schema>
 
+// accessDurationDays, level and promoVideoUrl are not shown in the form for now, but they stay in the values:
+// a PUT replaces the whole course, so the loaded values must be sent back unchanged.
 function toValues(course?: CourseAdminDetailResponse): FormValues {
   return {
     title: course?.title ?? '',
@@ -345,142 +344,110 @@ export default function CourseForm({ course }: { course?: CourseAdminDetailRespo
       <p className="-mb-3 text-xs text-muted-foreground">
         <RequiredMark /> bắt buộc
       </p>
-      <Card>
-        <CardHeader>
-          <CardTitle>Thông tin chung</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <Field label="Tên khóa học" required htmlFor="title" error={errors.title?.message}>
-            <Input id="title" aria-invalid={!!errors.title} {...register('title')} />
-          </Field>
-          <Field label="Mô tả ngắn" htmlFor="subtitle" error={errors.subtitle?.message}>
-            <Input id="subtitle" aria-invalid={!!errors.subtitle} {...register('subtitle')} />
-          </Field>
-          <Field label="Mô tả" htmlFor="description" error={errors.description?.message}>
-            <Textarea id="description" rows={6} {...register('description')} />
-          </Field>
-          <Field
-            label="Bạn sẽ học được"
-            htmlFor="whatYouWillLearn"
-            hint="Mỗi dòng là một ý."
-            error={errors.whatYouWillLearn?.message}
-          >
-            <Textarea id="whatYouWillLearn" rows={5} {...register('whatYouWillLearn')} />
-          </Field>
-          <Field label="Mô tả SEO" htmlFor="metaDescription" error={errors.metaDescription?.message}>
-            <Textarea id="metaDescription" rows={2} aria-invalid={!!errors.metaDescription} {...register('metaDescription')} />
-          </Field>
-        </CardContent>
-      </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Giá và thời hạn</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
-          <Field label="Giá bán" required htmlFor="priceVnd" error={errors.priceVnd?.message}>
-            <Controller
-              control={control}
-              name="priceVnd"
-              render={({ field }) => (
-                <VndInput id="priceVnd" aria-invalid={!!errors.priceVnd} value={field.value} onChange={field.onChange} />
-              )}
-            />
-          </Field>
-          <Field
-            label="Giá gốc"
-            htmlFor="compareAtPriceVnd"
-            hint="Hiển thị gạch ngang trên website."
-            error={errors.compareAtPriceVnd?.message}
-          >
-            <Controller
-              control={control}
-              name="compareAtPriceVnd"
-              render={({ field }) => (
-                <VndInput
-                  id="compareAtPriceVnd"
-                  aria-invalid={!!errors.compareAtPriceVnd}
-                  value={field.value}
-                  onChange={field.onChange}
+      <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Thông tin chung</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4">
+            <Field label="Tên khóa học" required htmlFor="title" error={errors.title?.message}>
+              <Input id="title" aria-invalid={!!errors.title} {...register('title')} />
+            </Field>
+            <Field label="Mô tả ngắn" htmlFor="subtitle" error={errors.subtitle?.message}>
+              <Input id="subtitle" aria-invalid={!!errors.subtitle} {...register('subtitle')} />
+            </Field>
+            <Field label="Mô tả" htmlFor="description" error={errors.description?.message}>
+              <Textarea id="description" rows={8} {...register('description')} />
+            </Field>
+            <Field
+              label="Bạn sẽ học được"
+              htmlFor="whatYouWillLearn"
+              hint="Mỗi dòng là một ý."
+              error={errors.whatYouWillLearn?.message}
+            >
+              <Textarea id="whatYouWillLearn" rows={5} {...register('whatYouWillLearn')} />
+            </Field>
+            <Field label="Mô tả SEO" htmlFor="metaDescription" error={errors.metaDescription?.message}>
+              <Textarea id="metaDescription" rows={2} aria-invalid={!!errors.metaDescription} {...register('metaDescription')} />
+            </Field>
+          </CardContent>
+        </Card>
+
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Ảnh bìa</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Controller
+                control={control}
+                name="thumbnail"
+                render={({ field }) => <ThumbnailField value={field.value} onChange={field.onChange} error={thumbnailError} />}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Giá</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Field label="Giá bán" required htmlFor="priceVnd" error={errors.priceVnd?.message}>
+                <Controller
+                  control={control}
+                  name="priceVnd"
+                  render={({ field }) => (
+                    <VndInput id="priceVnd" aria-invalid={!!errors.priceVnd} value={field.value} onChange={field.onChange} />
+                  )}
                 />
-              )}
-            />
-          </Field>
-          <Field
-            label="Thời hạn truy cập (ngày)"
-            htmlFor="accessDurationDays"
-            hint="Để trống = Trọn đời."
-            error={errors.accessDurationDays?.message}
-          >
-            <Input
-              id="accessDurationDays"
-              inputMode="numeric"
-              placeholder="Trọn đời"
-              aria-invalid={!!errors.accessDurationDays}
-              {...register('accessDurationDays')}
-            />
-          </Field>
-        </CardContent>
-      </Card>
+              </Field>
+              <Field
+                label="Giá gốc"
+                htmlFor="compareAtPriceVnd"
+                hint="Hiển thị gạch ngang trên website."
+                error={errors.compareAtPriceVnd?.message}
+              >
+                <Controller
+                  control={control}
+                  name="compareAtPriceVnd"
+                  render={({ field }) => (
+                    <VndInput
+                      id="compareAtPriceVnd"
+                      aria-invalid={!!errors.compareAtPriceVnd}
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  )}
+                />
+              </Field>
+            </CardContent>
+          </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Phân loại và liên kết</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2">
-          <Field label="Trình độ" htmlFor="level">
-            <Controller
-              control={control}
-              name="level"
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="level" className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LEVELS.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {COURSE_LEVEL_LABEL[level]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </Field>
-          <Field label="Danh mục">
-            <Controller
-              control={control}
-              name="categoryIds"
-              render={({ field }) => <CategoryPicker value={field.value} onChange={field.onChange} />}
-            />
-          </Field>
-          <Field label="Video giới thiệu" htmlFor="promoVideoUrl" error={errors.promoVideoUrl?.message}>
-            <Input id="promoVideoUrl" placeholder="https://..." aria-invalid={!!errors.promoVideoUrl} {...register('promoVideoUrl')} />
-          </Field>
-          <Field label="Nhóm Facebook cũ" htmlFor="legacyFacebookGroupUrl" error={errors.legacyFacebookGroupUrl?.message}>
-            <Input
-              id="legacyFacebookGroupUrl"
-              placeholder="https://..."
-              aria-invalid={!!errors.legacyFacebookGroupUrl}
-              {...register('legacyFacebookGroupUrl')}
-            />
-          </Field>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Ảnh bìa</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Controller
-            control={control}
-            name="thumbnail"
-            render={({ field }) => <ThumbnailField value={field.value} onChange={field.onChange} error={thumbnailError} />}
-          />
-        </CardContent>
-      </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Phân loại</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Field label="Danh mục">
+                <Controller
+                  control={control}
+                  name="categoryIds"
+                  render={({ field }) => <CategoryPicker value={field.value} onChange={field.onChange} />}
+                />
+              </Field>
+              <Field label="Nhóm Facebook cũ" htmlFor="legacyFacebookGroupUrl" error={errors.legacyFacebookGroupUrl?.message}>
+                <Input
+                  id="legacyFacebookGroupUrl"
+                  placeholder="https://..."
+                  aria-invalid={!!errors.legacyFacebookGroupUrl}
+                  {...register('legacyFacebookGroupUrl')}
+                />
+              </Field>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       <div className="flex justify-end gap-2">
         {course && isDirty && (

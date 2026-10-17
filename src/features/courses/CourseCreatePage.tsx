@@ -8,7 +8,7 @@ export default function CourseCreatePage() {
         title="Thêm khóa học"
         breadcrumb={[{ label: 'Khóa học', to: '/courses' }, { label: 'Thêm khóa học' }]}
       />
-      <div className="max-w-3xl">
+      <div className="max-w-6xl">
         <CourseForm />
       </div>
     </>
