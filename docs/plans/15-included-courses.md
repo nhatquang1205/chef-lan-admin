@@ -28,3 +28,16 @@ Context: `../chef-lan/docs/included-courses/spec.md`. Needs backend B1. API shap
 Against the local API: add C to P with a discount, edit the discount, reorder two includes, remove one; nested include
 and self include show the Vietnamese messages; deleting C while included shows the blocked message. `pnpm build` /
 `pnpm lint` clean. Clean up test data.
+
+## Implementation notes (done)
+
+- New: `src/lib/api/includes.ts`, `src/features/includes/{IncludesTab,IncludeRow,AddIncludeDialog}.tsx`; types
+  `CourseIncludeResponse`, `IncludedInResponse` and optional `includesCount` / `includedInCount` on the course detail;
+  error messages for `course.include_self|include_nested|include_discount_too_high|include_not_found|has_includes`.
+- Tab "Học phần chung" (`?tab=includes`). If the course is included elsewhere the tab shows only the "Khóa này là học phần
+  của: ..." links (no list, no add button). Otherwise: sortable list (optimistic reorder, as lessons), inline discount edit
+  with save button, remove with confirm, and the add dialog (course search via `listCourses`, hides this course and
+  already-included ones; the nested case is reported by the backend message; discount required, default 0, checked <= price).
+- `SortableList` needs `id`, so rows are mapped with `id = includedCourseId`.
+- Mutations invalidate `['course-includes', id]`, `['course', id]`, and `['course-included-in', childId]` / `['course', childId]`.
+- Deviation: course list badge (item 3) skipped; the list response has no counts. Not tested in the browser.

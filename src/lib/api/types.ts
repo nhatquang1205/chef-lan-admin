@@ -112,7 +112,26 @@ export interface CourseAdminDetailResponse {
   totalDurationSeconds: number
   enrollmentCount: number
   legacyFacebookGroupUrl?: string | null
+  includesCount?: number
+  includedInCount?: number
   categories: CategoryResponse[]
+}
+
+export interface CourseIncludeResponse {
+  includedCourseId: number
+  slug: string
+  title: string
+  status: CourseStatus
+  priceVnd: number
+  lessonCount: number
+  discountVnd: number
+  sortOrder: number
+}
+
+export interface IncludedInResponse {
+  id: number
+  slug: string
+  title: string
 }
 
 export interface CourseRequest {
