@@ -12,8 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { listCategories } from '@/lib/api/categories'
 import { listCourses } from '@/lib/api/courses'
-import type { CourseLevel, CourseListItemResponse, CourseListParams, CourseSortOrder, CourseStatus } from '@/lib/api/types'
-import { COURSE_LEVEL_LABEL, COURSE_STATUS_LABEL, COURSE_STATUS_VARIANT, formatDate, formatDuration, formatVnd } from '@/lib/format'
+import type { CourseListItemResponse, CourseListParams, CourseSortOrder, CourseStatus } from '@/lib/api/types'
+import { COURSE_STATUS_LABEL, COURSE_STATUS_VARIANT, formatDate, formatDuration, formatVnd } from '@/lib/format'
 
 const PAGE_SIZE = 20
 const ALL = 'all'
@@ -35,7 +35,6 @@ function parseParams(search: URLSearchParams): CourseListParams {
     status: oneOf(search.get('status'), Object.keys(COURSE_STATUS_LABEL) as CourseStatus[]),
     q: search.get('q') ?? undefined,
     categorySlug: search.get('categorySlug') ?? undefined,
-    level: oneOf(search.get('level'), Object.keys(COURSE_LEVEL_LABEL) as CourseLevel[]),
     sort: oneOf(search.get('sort'), Object.keys(SORT_LABEL) as CourseSortOrder[]),
     page: Number.isInteger(page) && page > 1 ? page : 1,
   }
@@ -149,7 +148,7 @@ export default function CoursesPage() {
     placeholderData: keepPreviousData,
   })
 
-  const hasFilters = Boolean(params.status || params.q || params.categorySlug || params.level || params.sort)
+  const hasFilters = Boolean(params.status || params.q || params.categorySlug || params.sort)
   const data = courses.data
   const addButton = (
     <Button asChild>
@@ -211,19 +210,6 @@ export default function CoursesPage() {
             {params.categorySlug && !categories.data?.some((c) => c.slug === params.categorySlug) && (
               <SelectItem value={params.categorySlug}>{params.categorySlug}</SelectItem>
             )}
-          </SelectContent>
-        </Select>
-        <Select value={params.level ?? ALL} onValueChange={(v) => update({ level: selectValue(v) })}>
-          <SelectTrigger aria-label="Trình độ" className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Mọi trình độ</SelectItem>
-            {Object.entries(COURSE_LEVEL_LABEL).map(([value, label]) => (
-              <SelectItem key={value} value={value}>
-                {label}
-              </SelectItem>
-            ))}
           </SelectContent>
         </Select>
         <Select value={params.sort ?? 'Newest'} onValueChange={(v) => update({ sort: v === 'Newest' ? undefined : v })}>
