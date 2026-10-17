@@ -11,7 +11,7 @@ export function listCourses(params: CourseListParams) {
   return adminFetch<PagedResult<CourseListItemResponse>>(`/api/v1/admins/courses${query ? `?${query}` : ''}`)
 }
 
-export type ThumbnailInput = { kind: 'none' } | { kind: 'url'; url: string } | { kind: 'file'; file: File }
+export type ThumbnailInput = { kind: 'none' } | { kind: 'url'; url: string }
 
 export interface CourseInput extends Omit<CourseRequest, 'thumbnailUrl'> {
   thumbnail: ThumbnailInput
@@ -21,28 +21,12 @@ function toJson({ thumbnail, ...fields }: CourseInput): CourseRequest {
   return { ...fields, thumbnailUrl: thumbnail.kind === 'url' ? thumbnail.url : null }
 }
 
-function toFormData({ thumbnail: _thumbnail, categoryIds, ...fields }: CourseInput, file: File) {
-  const form = new FormData()
-  for (const [key, value] of Object.entries(fields)) {
-    if (value !== undefined && value !== null && value !== '') form.append(key, String(value))
-  }
-  for (const id of categoryIds ?? []) form.append('categoryIds', String(id))
-  form.append('thumbnailFile', file)
-  return form
-}
-
-function body(input: CourseInput) {
-  return input.thumbnail.kind === 'file'
-    ? { formData: toFormData(input, input.thumbnail.file) }
-    : { body: toJson(input) }
-}
-
 export function getCourse(id: number) {
   return adminFetch<CourseAdminDetailResponse>(`/api/v1/admins/courses/${id}`)
 }
 
 export async function createCourse(input: CourseInput) {
-  const course = await adminFetch<CourseAdminDetailResponse>('/api/v1/admins/courses', { method: 'POST', ...body(input) })
+  const course = await adminFetch<CourseAdminDetailResponse>('/api/v1/admins/courses', { method: 'POST', body: toJson(input) })
   await queryClient.invalidateQueries({ queryKey: ['courses'] })
   queryClient.setQueryData(['course', course.id], course)
   return course
@@ -51,7 +35,7 @@ export async function createCourse(input: CourseInput) {
 export async function updateCourse(id: number, input: CourseInput) {
   const course = await adminFetch<CourseAdminDetailResponse>(`/api/v1/admins/courses/${id}`, {
     method: 'PUT',
-    ...body(input),
+    body: toJson(input),
   })
   await queryClient.invalidateQueries({ queryKey: ['courses'] })
   queryClient.setQueryData(['course', id], course)

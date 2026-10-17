@@ -31,3 +31,17 @@ input, always WebP) and B2 (gallery endpoints). Shapes: implementation notes at 
 Against the local API (B2 storage configured, or expect the 503 message): upload 3 images at once with progress, they
 appear in order as `.webp`; reorder → persists; edit alt; delete one; cover image upload still works and is `.webp`.
 `pnpm build` / `pnpm lint` clean. Clean up test data.
+
+## Implementation notes (done)
+
+- `lib/api/uploads.ts`: one private `xhrUpload` (token, progress, abort via `signal`) now backs both `uploadVideo` and `uploadImage`
+  (`uploadImage(file, { onProgress, signal })` -> `{ url, width, height }`). `MAX_IMAGE_BYTES` is 15 MB; 15 MB hints in the category
+  dialog and `upload.image_too_large`. Added `course.too_many_images` / `course.image_not_found` messages.
+- Cover image: the form still keeps the picked file locally, but on submit it uploads first, swaps the field to `{ kind: 'url', url }`
+  (so a failed save does not re-upload) and sends JSON only. `ThumbnailInput` no longer has a `file` kind; the multipart code in
+  `lib/api/courses.ts` is gone. Card title "Ảnh bìa (hiện ở banner trang chủ)" plus the 1920x1080 hint.
+- Tab "Hình ảnh" (`?tab=images`): `features/images/{ImagesTab,ImageCard}.tsx`, API in `lib/api/courseImages.ts`, key `['course-images', id]`.
+  Upload queue runs 3 at a time (upload, then attach with url/width/height); per-file progress, cancel, error with retry/skip;
+  the counter includes in-flight uploads and files over the 20 cap are skipped with a toast. `beforeunload` guard while uploads run.
+- `SortableList` got a `grid` prop (rect strategy); optimistic reorder as in lessons. Alt saves on blur/Enter; delete uses `ConfirmDialog`.
+- `CourseAdminDetailResponse.imageCount` typed but unused in the UI. Not tested in a browser; only build and lint were run.

@@ -18,10 +18,9 @@ import { Textarea } from '@/components/ui/textarea'
 import { listCategories } from '@/lib/api/categories'
 import { createCourse, updateCourse, type CourseInput } from '@/lib/api/courses'
 import { fieldErrors, messageFor } from '@/lib/api/errors'
+import { uploadImage, validateImage } from '@/lib/api/uploads'
 import type { CourseAdminDetailResponse } from '@/lib/api/types'
 import { useUnsavedChangesPrompt } from '@/lib/useUnsavedChangesPrompt'
-
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 
 const isHttpUrl = (value: string) => {
   try {
@@ -101,9 +100,7 @@ function toValues(course?: CourseAdminDetailResponse): FormValues {
 
 const orNull = (value: string) => (value.trim() === '' ? null : value)
 
-function toInput(values: FormValues): CourseInput {
-  const thumbnail: CourseInput['thumbnail'] =
-    values.thumbnail.kind === 'url' ? { kind: 'url', url: values.thumbnail.url.trim() } : values.thumbnail
+function toInput(values: FormValues, thumbnail: CourseInput['thumbnail']): CourseInput {
   return {
     title: values.title.trim(),
     subtitle: orNull(values.subtitle),
@@ -162,12 +159,9 @@ function ThumbnailField({ value, onChange, error }: {
 
   const pick = (picked: File | undefined) => {
     if (!picked) return
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(picked.type)) {
-      setFileError('Chỉ hỗ trợ ảnh JPEG, PNG hoặc WebP.')
-      return
-    }
-    if (picked.size > MAX_IMAGE_BYTES) {
-      setFileError('Ảnh quá lớn (tối đa 5 MB).')
+    const problem = validateImage(picked)
+    if (problem) {
+      setFileError(problem)
       return
     }
     if (previewUrl.current) URL.revokeObjectURL(previewUrl.current)
@@ -224,7 +218,8 @@ function ThumbnailField({ value, onChange, error }: {
               <X /> Xóa ảnh
             </Button>
           )}
-          <p className="text-xs text-muted-foreground">JPEG, PNG hoặc WebP, tối đa 5 MB.</p>
+          <p className="text-xs text-muted-foreground">JPEG, PNG hoặc WebP, tối đa 15 MB.</p>
+          <p className="max-w-56 text-xs text-muted-foreground">Nên dùng ảnh ngang ~1920×1080, món ăn ở giữa.</p>
         </div>
       </div>
       {showUrlInput && value.kind === 'url' && (
@@ -303,20 +298,39 @@ export default function CourseForm({ course }: { course?: CourseAdminDetailRespo
     control,
     handleSubmit,
     setError,
+    setValue,
     reset,
     formState: { errors, isDirty },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: toValues(course) })
 
   useUnsavedChangesPrompt(isDirty)
 
+  const [uploading, setUploading] = useState(false)
+
   const save = useMutation({
     mutationFn: (input: CourseInput) => (course ? updateCourse(course.id, input) : createCourse(input)),
   })
 
   const onSubmit = async (values: FormValues) => {
+    let thumbnail: CourseInput['thumbnail'] = { kind: 'none' }
+    if (values.thumbnail.kind === 'url') thumbnail = { kind: 'url', url: values.thumbnail.url.trim() }
+    if (values.thumbnail.kind === 'file') {
+      setUploading(true)
+      try {
+        const { url } = await uploadImage(values.thumbnail.file)
+        thumbnail = { kind: 'url', url }
+        setValue('thumbnail', thumbnail)
+      } catch (error) {
+        setError('thumbnail', { message: messageFor(error) })
+        return
+      } finally {
+        setUploading(false)
+      }
+    }
+
     let saved: CourseAdminDetailResponse
     try {
-      saved = await save.mutateAsync(toInput(values))
+      saved = await save.mutateAsync(toInput(values, thumbnail))
     } catch (error) {
       const fields = fieldErrors(error)
       const known = Object.keys(toValues()) as (keyof FormValues)[]
@@ -377,7 +391,7 @@ export default function CourseForm({ course }: { course?: CourseAdminDetailRespo
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Ảnh bìa</CardTitle>
+              <CardTitle>Ảnh bìa (hiện ở banner trang chủ)</CardTitle>
             </CardHeader>
             <CardContent>
               <Controller
@@ -451,12 +465,12 @@ export default function CourseForm({ course }: { course?: CourseAdminDetailRespo
 
       <div className="flex justify-end gap-2">
         {course && isDirty && (
-          <Button type="button" variant="outline" disabled={save.isPending} onClick={() => reset(toValues(course))}>
+          <Button type="button" variant="outline" disabled={save.isPending || uploading} onClick={() => reset(toValues(course))}>
             Hủy thay đổi
           </Button>
         )}
-        <Button type="submit" disabled={save.isPending || (!!course && !isDirty)}>
-          {save.isPending && <Loader2 className="animate-spin" />}
+        <Button type="submit" disabled={save.isPending || uploading || (!!course && !isDirty)}>
+          {(save.isPending || uploading) && <Loader2 className="animate-spin" />}
           {course ? 'Lưu thay đổi' : 'Tạo khóa học'}
         </Button>
       </div>

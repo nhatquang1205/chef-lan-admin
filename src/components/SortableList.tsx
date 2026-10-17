@@ -9,6 +9,7 @@ import {
 } from '@dnd-kit/core'
 import {
   arrayMove,
+  rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -22,9 +23,10 @@ interface Props<T extends { id: number }> {
   items: T[]
   onReorder: (items: T[]) => void
   renderItem: (item: T, index: number, handle: ReactNode) => ReactNode
+  grid?: boolean
 }
 
-export default function SortableList<T extends { id: number }>({ items, onReorder, renderItem }: Props<T>) {
+export default function SortableList<T extends { id: number }>({ items, onReorder, renderItem, grid }: Props<T>) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -40,8 +42,8 @@ export default function SortableList<T extends { id: number }>({ items, onReorde
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <SortableContext items={items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
-        <ul className="flex flex-col gap-2">
+      <SortableContext items={items.map((item) => item.id)} strategy={grid ? rectSortingStrategy : verticalListSortingStrategy}>
+        <ul className={grid ? 'grid grid-cols-[repeat(auto-fill,minmax(14rem,1fr))] gap-4' : 'flex flex-col gap-2'}>
           {items.map((item, index) => (
             <SortableRow key={item.id} id={item.id}>
               {(handle) => renderItem(item, index, handle)}

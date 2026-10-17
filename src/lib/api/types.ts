@@ -114,7 +114,17 @@ export interface CourseAdminDetailResponse {
   legacyFacebookGroupUrl?: string | null
   includesCount?: number
   includedInCount?: number
+  imageCount?: number
   categories: CategoryResponse[]
+}
+
+export interface CourseImageResponse {
+  id: number
+  url: string
+  alt?: string | null
+  width?: number | null
+  height?: number | null
+  sortOrder: number
 }
 
 export interface CourseIncludeResponse {

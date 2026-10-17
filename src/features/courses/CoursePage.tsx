@@ -19,12 +19,13 @@ import { ApiError } from '@/lib/api/client'
 import { deleteCourse, getCourse, publishCourse, unpublishCourse } from '@/lib/api/courses'
 import { messageFor } from '@/lib/api/errors'
 import { COURSE_STATUS_LABEL, COURSE_STATUS_VARIANT, formatDate, formatDuration } from '@/lib/format'
+import ImagesTab from '@/features/images/ImagesTab'
 import IncludesTab from '@/features/includes/IncludesTab'
 import LessonList from '@/features/lessons/LessonList'
 import CourseForm from './CourseForm'
 
 const PUBLIC_SITE_URL = (import.meta.env.VITE_PUBLIC_SITE_URL ?? '').replace(/\/+$/, '')
-const TABS = ['info', 'lessons', 'includes'] as const
+const TABS = ['info', 'lessons', 'includes', 'images'] as const
 
 export default function CoursePage() {
   const id = Number(useParams().id)
@@ -132,6 +133,7 @@ export default function CoursePage() {
           <TabsTrigger value="info">Thông tin</TabsTrigger>
           <TabsTrigger value="lessons">Bài học</TabsTrigger>
           <TabsTrigger value="includes">Học phần chung</TabsTrigger>
+          <TabsTrigger value="images">Hình ảnh</TabsTrigger>
         </TabsList>
         <TabsContent value="info" className="max-w-6xl pt-4">
           <CourseForm key={course.id} course={course} />
@@ -141,6 +143,9 @@ export default function CoursePage() {
         </TabsContent>
         <TabsContent value="includes" className="pt-4">
           <IncludesTab courseId={course.id} priceVnd={course.priceVnd} />
+        </TabsContent>
+        <TabsContent value="images" className="pt-4">
+          <ImagesTab courseId={course.id} />
         </TabsContent>
       </Tabs>
       <ConfirmDialog

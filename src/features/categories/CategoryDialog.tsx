@@ -241,7 +241,7 @@ function CategoryForm({ category, onDone }: { category?: CategoryAdminResponse |
                 <X /> Xóa ảnh
               </Button>
             )}
-            <p className="text-xs text-muted-foreground">JPEG, PNG hoặc WebP, tối đa 5 MB.</p>
+            <p className="text-xs text-muted-foreground">JPEG, PNG hoặc WebP, tối đa 15 MB.</p>
           </div>
         </div>
         {(showUrlInput || (!file && thumbnailUrl !== '')) && (
