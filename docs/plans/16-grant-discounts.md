@@ -21,3 +21,15 @@ notes at the end of `../chef-lan/docs/included-courses/plans/03-discounts-and-gr
 Against the local API: a customer who has C gets the discounted amount prefilled when granted P, the grant stores the
 discount and the access list shows it; a customer without C sees no discount; "Bỏ giảm giá" works. `pnpm build` /
 `pnpm lint` clean. Clean up test data.
+
+## Implementation notes (done)
+
+- `lib/api/access.ts` gains `getCourseQuote`; types `QuoteDiscount`, `CourseQuoteResponse`, and the three discount fields on
+  `CourseEnrollmentResponse` and `GrantAccessFields`.
+- `GrantAccessDialog`: on the "Cả khóa học" tab the quote is fetched (`getCourseQuote`, in the pick handler, stale responses ignored, failures ignored) when a course is picked
+  With discounts it shows the struck-through list price, each reason line, the final price and a "Bỏ giảm giá" link;
+  amount (when paid) and an empty note are prefilled once. The grant sends `listPriceVnd`, `discountVnd` (list − final) and
+  `discountReason` (reasons joined with "; "). "Bỏ giảm giá" resets the amount to list price, clears a note that still equals the
+  reason, and sends no discount. Lesson grants never send discount fields.
+- `AccessSection` shows "Giảm X — reason" under the paid amount of course rows.
+- Not exercised in a browser; only build and lint were run.

@@ -311,6 +311,22 @@ interface EnrollmentBase {
 export interface CourseEnrollmentResponse extends EnrollmentBase {
   courseId: number
   courseTitle?: string | null
+  listPriceVnd?: number | null
+  discountVnd?: number | null
+  discountReason?: string | null
+}
+
+export interface QuoteDiscount {
+  includedCourseId: number
+  title: string
+  discountVnd: number
+  reason: string
+}
+
+export interface CourseQuoteResponse {
+  listPriceVnd: number
+  discounts: QuoteDiscount[]
+  finalPriceVnd: number
 }
 
 export interface LessonEnrollmentResponse extends EnrollmentBase {
@@ -331,4 +347,7 @@ export interface GrantAccessFields {
   amountPaidVnd?: number | null
   paymentNote?: string | null
   paymentReference?: string | null
+  listPriceVnd?: number | null
+  discountVnd?: number | null
+  discountReason?: string | null
 }

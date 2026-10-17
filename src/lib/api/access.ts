@@ -2,6 +2,7 @@ import { adminFetch } from './admin'
 import { queryClient } from '@/lib/query'
 import type {
   CourseEnrollmentResponse,
+  CourseQuoteResponse,
   CustomerAccessResponse,
   GrantAccessFields,
   LessonEnrollmentResponse,
@@ -11,6 +12,10 @@ const BASE = '/api/v1/admins'
 
 export function getCustomerAccess(customerId: number) {
   return adminFetch<CustomerAccessResponse>(`${BASE}/customers/${customerId}/access`)
+}
+
+export function getCourseQuote(customerId: number, courseId: number) {
+  return adminFetch<CourseQuoteResponse>(`${BASE}/customers/${customerId}/quote?courseId=${courseId}`)
 }
 
 async function afterChange(customerId: number, courseId?: number | null) {

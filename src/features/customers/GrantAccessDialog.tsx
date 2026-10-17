@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,10 +16,11 @@ import FieldLabel from '@/components/FieldLabel'
 import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import VndInput from '@/components/VndInput'
-import { grantCourseAccess, grantLessonAccess } from '@/lib/api/access'
+import { getCourseQuote, grantCourseAccess, grantLessonAccess } from '@/lib/api/access'
 import { listCourses } from '@/lib/api/courses'
 import { fieldErrors, messageFor } from '@/lib/api/errors'
 import { listLessons } from '@/lib/api/lessons'
+import type { CourseQuoteResponse } from '@/lib/api/types'
 import { formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
 
@@ -55,6 +56,10 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
   const [amount, setAmount] = useState<number | null>(null)
   const [note, setNote] = useState('')
   const [reference, setReference] = useState('')
+  const pickedCourse = useRef<number | null>(null)
+  const isPaidRef = useRef(false)
+  const [quoteData, setQuoteData] = useState<CourseQuoteResponse | null>(null)
+  const [discountDropped, setDiscountDropped] = useState(false)
   const [pending, setPending] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
@@ -73,7 +78,18 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
     enabled: mode === 'lesson' && course !== null,
   })
 
-  const defaultPrice = mode === 'course' ? (course?.price ?? null) : (lesson?.price ?? null)
+  const activeQuote =
+    mode === 'course' && quoteData && quoteData.discounts.length > 0 && !discountDropped ? quoteData : null
+  const quoteReason = quoteData ? quoteData.discounts.map((d) => d.reason).join('; ') : ''
+
+  const defaultPrice =
+    mode === 'course' ? (activeQuote?.finalPriceVnd ?? course?.price ?? null) : (lesson?.price ?? null)
+
+  const dropDiscount = () => {
+    setDiscountDropped(true)
+    if (isPaid) setAmount(quoteData?.listPriceVnd ?? course?.price ?? null)
+    setNote((current) => (current === quoteReason ? '' : current))
+  }
 
   const switchMode = (next: string) => {
     setMode(next as Mode)
@@ -84,8 +100,20 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
 
   const pickCourse = (next: { id: number; title: string; price: number }) => {
     setCourse(next)
+    pickedCourse.current = next.id
     setLesson(null)
+    setDiscountDropped(false)
+    setQuoteData(null)
     setAmount(isPaid && mode === 'course' ? next.price : null)
+    if (mode !== 'course') return
+    getCourseQuote(customerId, next.id)
+      .then((result) => {
+        if (pickedCourse.current !== next.id || result.discounts.length === 0) return
+        setQuoteData(result)
+        setAmount((current) => (isPaidRef.current ? result.finalPriceVnd : current))
+        setNote((current) => current || result.discounts.map((d) => d.reason).join('; '))
+      })
+      .catch(() => {})
   }
 
   const pickLesson = (next: { id: number; price: number | null }) => {
@@ -95,6 +123,7 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
 
   const togglePaid = (next: boolean) => {
     setIsPaid(next)
+    isPaidRef.current = next
     setAmount(next ? defaultPrice : null)
   }
 
@@ -111,6 +140,13 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
       amountPaidVnd: isPaid ? amount : null,
       paymentNote: note.trim() || null,
       paymentReference: reference.trim() || null,
+      ...(mode === 'course' && activeQuote
+        ? {
+            listPriceVnd: activeQuote.listPriceVnd,
+            discountVnd: activeQuote.listPriceVnd - activeQuote.finalPriceVnd,
+            discountReason: quoteReason,
+          }
+        : {}),
     }
     setPending(true)
     setErrors({})
@@ -196,6 +232,28 @@ function GrantForm({ customerId, onDone }: { customerId: number; onDone: () => v
         </div>
       )}
       {errors.target && <p className="text-sm text-destructive">{errors.target}</p>}
+
+      {activeQuote && (
+        <div className="flex flex-col gap-1 rounded-md border bg-muted/40 p-3 text-sm">
+          <div className="flex justify-between gap-3">
+            <span className="text-muted-foreground">Giá niêm yết</span>
+            <span className="text-muted-foreground line-through">{formatVnd(activeQuote.listPriceVnd)}</span>
+          </div>
+          {activeQuote.discounts.map((d) => (
+            <div key={d.includedCourseId} className="flex justify-between gap-3">
+              <span>{d.reason}</span>
+              <span className="shrink-0">−{formatVnd(d.discountVnd)}</span>
+            </div>
+          ))}
+          <div className="flex justify-between gap-3 font-medium">
+            <span>Giá sau giảm</span>
+            <span>{formatVnd(activeQuote.finalPriceVnd)}</span>
+          </div>
+          <button type="button" className="self-start text-xs text-muted-foreground underline" onClick={dropDiscount}>
+            Bỏ giảm giá
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <Switch id="grant-paid" checked={isPaid} onCheckedChange={togglePaid} />

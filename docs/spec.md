@@ -95,7 +95,7 @@ Implement in order; each plan leaves the app building and usable.
 | 13 | [Customer invitations](plans/13-customer-invites.md) — needs backend B3 | done |
 | 14 | [Customer access: grant / revoke courses and lessons](plans/14-customer-access.md) | done |
 | 15 | [Included courses (shared modules)](plans/15-included-courses.md) — needs backend included-courses B1 | done |
-| 16 | [Discount when granting a course](plans/16-grant-discounts.md) — needs backend included-courses B3 | todo |
+| 16 | [Discount when granting a course](plans/16-grant-discounts.md) — needs backend included-courses B3 | done |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.

@@ -130,6 +130,12 @@ function AccessTable({ title, empty, rows, nameOf, onRevoke }: TableProps) {
                     <TableCell>{row.expiresAt ? formatDate(row.expiresAt) : 'Trọn đời'}</TableCell>
                     <TableCell>
                       {!row.isPaid ? 'Miễn phí' : row.amountPaidVnd != null ? formatVnd(row.amountPaidVnd) : 'Đã thanh toán'}
+                      {'discountVnd' in row && !!row.discountVnd && (
+                        <div className="text-xs text-muted-foreground">
+                          Giảm {formatVnd(row.discountVnd)}
+                          {row.discountReason ? ` — ${row.discountReason}` : ''}
+                        </div>
+                      )}
                     </TableCell>
                     <TableCell className="max-w-48 whitespace-normal">
                       {[row.paymentNote, row.paymentReference].filter(Boolean).join(' · ') || '—'}
