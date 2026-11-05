@@ -361,3 +361,45 @@ export interface GrantAccessFields {
   discountVnd?: number | null
   discountReason?: string | null
 }
+
+export type OrderStatus = 'Pending' | 'Paid' | 'Expired' | 'Cancelled'
+export type OrderPaymentMethod = 'BankTransfer' | 'ContactChef'
+export type OrderPaidVia = 'Webhook' | 'Manual'
+
+export interface AdminOrderItemResponse {
+  kind: 'Course' | 'Lesson'
+  title: string
+  courseSlug: string
+  listPriceVnd: number
+  discountVnd: number
+  unitPriceVnd: number
+}
+
+export interface AdminOrderResponse {
+  id: number
+  code: string
+  status: OrderStatus
+  paymentMethod: OrderPaymentMethod
+  amountVnd: number
+  customerId: number
+  customerName?: string | null
+  customerEmail?: string | null
+  customerPhone?: string | null
+  createdAt: string
+  expiresAt: string
+  paidAt?: string | null
+  paidVia?: OrderPaidVia | null
+  paidReason?: string | null
+  paidByStaffId?: number | null
+  paymentTransactionId?: number | null
+  items: AdminOrderItemResponse[]
+}
+
+export interface OrderListParams {
+  q?: string
+  status?: OrderStatus
+  paymentMethod?: OrderPaymentMethod
+  customerId?: number
+  page?: number
+  pageSize?: number
+}

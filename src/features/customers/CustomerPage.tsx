@@ -1,23 +1,27 @@
 import { useQuery } from '@tanstack/react-query'
 import { Lock, LockOpen, Mail } from 'lucide-react'
 import { useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { toast } from 'sonner'
 import ConfirmDialog from '@/components/ConfirmDialog'
 import PageHeader from '@/components/PageHeader'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
 import StatusBadge from '@/components/StatusBadge'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ApiError } from '@/lib/api/client'
 import { deactivateCustomer, getCustomer, inviteCustomer, reactivateCustomer } from '@/lib/api/customers'
 import { messageFor } from '@/lib/api/errors'
 import { CUSTOMER_STATUS_LABEL, CUSTOMER_STATUS_VARIANT, formatDateTime } from '@/lib/format'
+import CustomerOrdersTab from '@/features/orders/CustomerOrdersTab'
 import AccessSection from './AccessSection'
 import CustomerForm from './CustomerForm'
 
 export default function CustomerPage() {
   const id = Number(useParams().id)
   const valid = Number.isInteger(id) && id > 0
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = searchParams.get('tab') === 'orders' ? 'orders' : 'info'
   const [confirmLock, setConfirmLock] = useState(false)
   const [confirmInvite, setConfirmInvite] = useState(false)
   const [inviting, setInviting] = useState(false)
@@ -118,10 +122,21 @@ export default function CustomerPage() {
         }
       />
       {dates.length > 0 && <p className="-mt-3 mb-6 text-sm text-muted-foreground">{dates.join(' · ')}</p>}
-      <div className="flex max-w-3xl flex-col gap-6">
-        <CustomerForm key={`${customer.id}:${customer.status}`} customer={customer} />
-        <AccessSection customerId={customer.id} isActive={customer.isActive} />
-      </div>
+      <Tabs value={tab} onValueChange={(next) => setSearchParams(next === 'info' ? {} : { tab: next }, { replace: true })}>
+        <TabsList>
+          <TabsTrigger value="info">Thông tin</TabsTrigger>
+          <TabsTrigger value="orders">Đơn hàng</TabsTrigger>
+        </TabsList>
+        <TabsContent value="info" className="max-w-3xl pt-4">
+          <div className="flex flex-col gap-6">
+            <CustomerForm key={`${customer.id}:${customer.status}`} customer={customer} />
+            <AccessSection customerId={customer.id} isActive={customer.isActive} />
+          </div>
+        </TabsContent>
+        <TabsContent value="orders" className="pt-4">
+          <CustomerOrdersTab customerId={customer.id} />
+        </TabsContent>
+      </Tabs>
       <ConfirmDialog
         open={confirmInvite}
         onOpenChange={setConfirmInvite}

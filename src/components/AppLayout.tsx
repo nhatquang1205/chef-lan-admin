@@ -1,4 +1,4 @@
-import { BookOpen, Tags, Users, ChevronDown, KeyRound, LogOut, Menu } from 'lucide-react'
+import { BookOpen, Receipt, Tags, Users, ChevronDown, KeyRound, LogOut, Menu } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { to: '/courses', label: 'Khóa học', icon: BookOpen },
   { to: '/categories', label: 'Danh mục', icon: Tags },
   { to: '/customers', label: 'Khách hàng', icon: Users },
+  { to: '/orders', label: 'Đơn hàng', icon: Receipt },
 ]
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {

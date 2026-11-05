@@ -39,3 +39,14 @@ transaction screen.
 `pnpm build`, `pnpm lint` clean. In the browser: filters, search and paging work and survive a reload; approving a contact
 order shows Paid and the course appears in that customer's access without a reload; cancel works; the customer tab shows only
 that customer's orders; 375 px layout holds. Test data removed. Add implementation notes here.
+
+## Implementation notes
+
+Done as planned. Files: `lib/api/orders.ts`, `features/orders/{OrdersTable,OrderDialog,OrdersPage,CustomerOrdersTab}.tsx`, tabs in `CustomerPage.tsx`, nav item and route.
+
+- The method filter's URL key is `method` (the API parameter is `paymentMethod`); `status`, `q`, `page` as in `CustomersPage`.
+- `OrdersTable` owns the detail dialog and keeps a snapshot of the clicked order; approve and cancel replace it with the order the API returns, so the dialog shows the new state at once. Consequence: when the active status filter no longer matches the changed order, the list becomes empty/shorter and, if it becomes empty, the table (and so the dialog) unmounts. The toast confirms the action.
+- Approve is a second view inside the same dialog (not a nested dialog); "Quay lại" returns to the details. Reason is trimmed, required, max 300.
+- `invalidateOrders(customerId)` invalidates `['orders']` and `['customer-access', customerId]`. Customer detail tabs unmount the inactive tab, so the access list is also refetched on return.
+- Customer tab: `?tab=orders`; paging is component state.
+- Verified in the browser against the local API: filters (status incl. Expired on a backdated order, method, q, combined) and page 2 survive a reload; approving an expired and a pending contact order shows Paid with reason and `Nhân viên #id` and the course appears in the customer's access without a reload; empty-reason validation; cancel; the customer tab lists only that customer's orders and pages; at 375 px the page does not scroll sideways (table scrolls inside its card) and the dialog fits. Not tested: BankTransfer approval from a real SePay order (checkout is off locally; rows were inserted directly), `order.already_paid` / `order.not_pending` toasts (only the backend message mapping exists).

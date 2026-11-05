@@ -1,4 +1,12 @@
-import type { CourseLevel, EnrollmentStatus, CourseStatus, CustomerStatus, VideoProvider } from '@/lib/api/types'
+import type {
+  CourseLevel,
+  CourseStatus,
+  CustomerStatus,
+  EnrollmentStatus,
+  OrderPaymentMethod,
+  OrderStatus,
+  VideoProvider,
+} from '@/lib/api/types'
 
 const vndFormat = new Intl.NumberFormat('vi-VN')
 
@@ -87,4 +95,23 @@ export const ENROLLMENT_STATUS_LABEL: Record<EnrollmentStatus, string> = {
   Active: 'Đang hiệu lực',
   Expired: 'Hết hạn',
   Revoked: 'Đã thu hồi',
+}
+
+export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  Pending: 'Chờ thanh toán',
+  Paid: 'Đã thanh toán',
+  Expired: 'Hết hạn',
+  Cancelled: 'Đã hủy',
+}
+
+export const ORDER_STATUS_VARIANT: Record<OrderStatus, 'default' | 'secondary' | 'outline' | 'destructive'> = {
+  Pending: 'secondary',
+  Paid: 'default',
+  Expired: 'outline',
+  Cancelled: 'destructive',
+}
+
+export const ORDER_METHOD_LABEL: Record<OrderPaymentMethod, string> = {
+  BankTransfer: 'Chuyển khoản',
+  ContactChef: 'Liên hệ Chef Lan',
 }

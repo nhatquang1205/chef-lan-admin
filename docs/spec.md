@@ -71,6 +71,11 @@ All admin endpoints need `Authorization: Bearer <staff access token>`. Enums are
 - `POST /videos` multipart fields `title` (first) then `file` (≤ 8 GB, streamed) → `{ videoId, title }`; put `videoId` into a video's `externalId`.
 - Errors: `upload.*` (`unsupported_image`, `image_too_large`, `video_host_not_configured` 503, ...).
 
+**Orders** (`/api/v1/admins/orders`)
+- `GET ?status=&paymentMethod=&customerId=&q=&page=&pageSize=` → `PagedResult<AdminOrderResponse { id, code, status, paymentMethod, amountVnd, customerId, customerName?, customerEmail?, customerPhone?, createdAt, expiresAt, paidAt?, paidVia?, paidReason?, paidByStaffId?, paymentTransactionId?, items[{ kind, title, courseSlug, listPriceVnd, discountVnd, unitPriceVnd }] }>`
+  `status`: `Pending, Paid, Expired, Cancelled` (effective status). `paymentMethod`: `BankTransfer, ContactChef`. `paidVia`: `Webhook, Manual`.
+- `POST /{id}/mark-paid` `{ reason }` → order (grants access; 409 `order.already_paid`) · `POST /{id}/cancel` → order (409 `order.not_pending`)
+
 **Errors**: `ProblemDetails { title, status, detail?, code? , errors? }`; validation 400 has
 `errors: { "PriceVnd": ["..."] }` (PascalCase keys). 409 also comes from concurrent edits.
 
@@ -97,7 +102,7 @@ Implement in order; each plan leaves the app building and usable.
 | 15 | [Included courses (shared modules)](plans/15-included-courses.md) — needs backend included-courses B1 | done |
 | 16 | [Discount when granting a course](plans/16-grant-discounts.md) — needs backend included-courses B3 | done |
 | 17 | [Course images (gallery) and WebP uploads](plans/17-course-images.md) — needs backend course-images B1 + B2 | done |
-| 18 | [Orders](plans/18-orders.md) — needs backend payments plan 02 | todo |
+| 18 | [Orders](plans/18-orders.md) — needs backend payments plan 02 | done |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.
