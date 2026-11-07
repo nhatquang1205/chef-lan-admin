@@ -34,7 +34,7 @@ export default function AddIncludeDialog({ open, onOpenChange, ...rest }: Props)
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>Thêm học phần</DialogTitle>
-          <DialogDescription>Chọn khóa học sẽ được bao gồm trong khóa này.</DialogDescription>
+          <DialogDescription>Chọn học phần chung sẽ được bao gồm trong khóa này.</DialogDescription>
         </DialogHeader>
         {open && <AddForm {...rest} onDone={() => onOpenChange(false)} />}
       </DialogContent>
@@ -56,8 +56,8 @@ function AddForm({ courseId, priceVnd, existingIds, onDone }: Omit<Props, 'open'
   }, [search])
 
   const courses = useQuery({
-    queryKey: ['courses', { q: debounced, pageSize: 10, picker: true }],
-    queryFn: () => listCourses({ q: debounced, pageSize: 10 }),
+    queryKey: ['courses', { q: debounced, pageSize: 10, isSharedModule: true, picker: true }],
+    queryFn: () => listCourses({ q: debounced, pageSize: 10, isSharedModule: true }),
   })
   const candidates = courses.data?.items.filter((item) => item.id !== courseId && !existingIds.includes(item.id))
 
@@ -98,7 +98,11 @@ function AddForm({ courseId, priceVnd, existingIds, onDone }: Omit<Props, 'open'
           ) : courses.error ? (
             <p className="p-3 text-sm text-destructive">{messageFor(courses.error)}</p>
           ) : candidates!.length === 0 ? (
-            <p className="p-3 text-sm text-muted-foreground">Không có khóa học nào.</p>
+            <p className="p-3 text-sm text-muted-foreground">
+              {debounced
+                ? 'Không có học phần chung nào phù hợp.'
+                : 'Chưa có học phần chung nào. Hãy bật "Đây là học phần chung" trong khóa học muốn dùng trước.'}
+            </p>
           ) : (
             candidates!.map((item) => (
               <button

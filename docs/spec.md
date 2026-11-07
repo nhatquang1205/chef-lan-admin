@@ -37,11 +37,11 @@ All admin endpoints need `Authorization: Bearer <staff access token>`. Enums are
 - `GET /api/v1/admins/categories?status=&q=` → `CategoryAdminResponse[] { id, name, slug, description?, thumbnailUrl?, displayOrder, status: "Active"|"InActive" }`
 
 **Courses** (`/api/v1/admins/courses`)
-- `GET ?status=Draft|Published|Archived&q=&categorySlug=&level=&sort=Newest|PriceAsc|PriceDesc|Title&page=1&pageSize=12`
+- `GET ?status=Draft|Published|Archived&q=&categorySlug=&level=&isSharedModule=true|false&sort=Newest|PriceAsc|PriceDesc|Title&page=1&pageSize=12`
   → `PagedResult<CourseListItemResponse> { items, page, pageSize, totalCount, totalPages, hasPrevious, hasNext }`;
   item = `{ id, slug, title, subtitle?, thumbnailUrl?, level, status, publishedAt?, priceVnd, compareAtPriceVnd?, priceDisplay, lessonCount, totalDurationSeconds, accessDurationDays?, categories: CategoryResponse[] }`
-- `GET /{id}` → `CourseAdminDetailResponse { id, slug, title, subtitle?, description?, whatYouWillLearn?, metaDescription?, thumbnailUrl?, promoVideoUrl?, level, status, publishedAt?, priceVnd, compareAtPriceVnd?, currency, accessDurationDays?, lessonCount, totalDurationSeconds, enrollmentCount, legacyFacebookGroupUrl?, categories }`
-- `POST` / `PUT /{id}` — JSON `CourseRequest { title, subtitle?, description?, whatYouWillLearn?, metaDescription?, thumbnailUrl?, promoVideoUrl?, priceVnd, compareAtPriceVnd?, accessDurationDays?, legacyFacebookGroupUrl?, categoryIds?, level }`
+- `GET /{id}` → `CourseAdminDetailResponse { id, slug, title, subtitle?, description?, whatYouWillLearn?, metaDescription?, thumbnailUrl?, promoVideoUrl?, level, status, publishedAt?, priceVnd, compareAtPriceVnd?, currency, accessDurationDays?, lessonCount, totalDurationSeconds, enrollmentCount, legacyFacebookGroupUrl?, isSharedModule, categories }`
+- `POST` / `PUT /{id}` — JSON `CourseRequest { title, subtitle?, description?, whatYouWillLearn?, metaDescription?, thumbnailUrl?, promoVideoUrl?, priceVnd, compareAtPriceVnd?, accessDurationDays?, legacyFacebookGroupUrl?, categoryIds?, level, isSharedModule }`
   **or** `multipart/form-data` with the same fields plus `thumbnailFile` (JPEG/PNG/WebP ≤ 5 MB) instead of
   `thumbnailUrl` (both = 400 `course.thumbnail_conflict`); `categoryIds` repeated once per id. 201 / 200 with the detail.
   PUT replaces everything: omitted thumbnail = cleared. `compareAtPriceVnd >= priceVnd`. Unknown category: 400 `course.unknown_categories`.
@@ -103,7 +103,7 @@ Implement in order; each plan leaves the app building and usable.
 | 16 | [Discount when granting a course](plans/16-grant-discounts.md) — needs backend included-courses B3 | done |
 | 17 | [Course images (gallery) and WebP uploads](plans/17-course-images.md) — needs backend course-images B1 + B2 | done |
 | 18 | [Orders](plans/18-orders.md) — needs backend payments plan 02 | done |
-| 19 | [Shared modules](plans/19-shared-modules.md) — needs backend included-courses plan 04 | todo |
+| 19 | [Shared modules](plans/19-shared-modules.md) — needs backend included-courses plan 04 | done |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.

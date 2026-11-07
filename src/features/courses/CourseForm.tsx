@@ -14,6 +14,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Input } from '@/components/ui/input'
 import FieldLabel, { RequiredMark } from '@/components/FieldLabel'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { listCategories } from '@/lib/api/categories'
 import { createCourse, updateCourse, type CourseInput } from '@/lib/api/courses'
@@ -69,6 +70,7 @@ const schema = z
     categoryIds: z.array(z.number()),
     promoVideoUrl: optionalUrl,
     legacyFacebookGroupUrl: optionalUrl,
+    isSharedModule: z.boolean(),
     thumbnail: thumbnailSchema,
   })
   .refine((v) => v.compareAtPriceVnd === null || v.priceVnd === null || v.compareAtPriceVnd >= v.priceVnd, {
@@ -94,6 +96,7 @@ function toValues(course?: CourseAdminDetailResponse): FormValues {
     categoryIds: course?.categories.map((c) => c.id) ?? [],
     promoVideoUrl: course?.promoVideoUrl ?? '',
     legacyFacebookGroupUrl: course?.legacyFacebookGroupUrl ?? '',
+    isSharedModule: course?.isSharedModule ?? false,
     thumbnail: course?.thumbnailUrl ? { kind: 'url', url: course.thumbnailUrl } : { kind: 'none' },
   }
 }
@@ -114,6 +117,7 @@ function toInput(values: FormValues, thumbnail: CourseInput['thumbnail']): Cours
     legacyFacebookGroupUrl: orNull(values.legacyFacebookGroupUrl)?.trim() ?? null,
     categoryIds: values.categoryIds,
     level: values.level,
+    isSharedModule: values.isSharedModule,
     thumbnail,
   }
 }
@@ -450,6 +454,21 @@ export default function CourseForm({ course }: { course?: CourseAdminDetailRespo
                   render={({ field }) => <CategoryPicker value={field.value} onChange={field.onChange} />}
                 />
               </Field>
+              <div className="flex flex-col gap-2">
+                <Controller
+                  control={control}
+                  name="isSharedModule"
+                  render={({ field }) => (
+                    <div className="flex items-center gap-3">
+                      <Switch id="isSharedModule" checked={field.value} onCheckedChange={field.onChange} />
+                      <FieldLabel htmlFor="isSharedModule">Đây là học phần chung</FieldLabel>
+                    </div>
+                  )}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Khóa này sẽ không hiện trong danh sách khóa học công khai, và có thể được thêm vào khóa khác làm học phần.
+                </p>
+              </div>
               <Field label="Nhóm Facebook cũ" htmlFor="legacyFacebookGroupUrl" error={errors.legacyFacebookGroupUrl?.message}>
                 <Input
                   id="legacyFacebookGroupUrl"

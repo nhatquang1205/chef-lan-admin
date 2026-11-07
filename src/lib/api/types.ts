@@ -88,6 +88,7 @@ export interface CourseListItemResponse {
   lessonCount: number
   totalDurationSeconds: number
   accessDurationDays?: number | null
+  isSharedModule: boolean
   categories: CategoryResponse[]
 }
 
@@ -112,6 +113,7 @@ export interface CourseAdminDetailResponse {
   totalDurationSeconds: number
   enrollmentCount: number
   legacyFacebookGroupUrl?: string | null
+  isSharedModule: boolean
   includesCount?: number
   includedInCount?: number
   imageCount?: number
@@ -158,6 +160,7 @@ export interface CourseRequest {
   legacyFacebookGroupUrl?: string | null
   categoryIds?: number[] | null
   level: CourseLevel
+  isSharedModule: boolean
 }
 
 export interface CourseListParams {
@@ -165,6 +168,7 @@ export interface CourseListParams {
   q?: string
   categorySlug?: string
   level?: CourseLevel
+  isSharedModule?: boolean
   sort?: CourseSortOrder
   page?: number
   pageSize?: number

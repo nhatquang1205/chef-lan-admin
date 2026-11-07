@@ -14,7 +14,7 @@ import type { CourseIncludeResponse } from '@/lib/api/types'
 import AddIncludeDialog from './AddIncludeDialog'
 import IncludeRow from './IncludeRow'
 
-export default function IncludesTab({ courseId, priceVnd }: { courseId: number; priceVnd: number }) {
+export default function IncludesTab({ courseId, priceVnd, isSharedModule }: { courseId: number; priceVnd: number; isSharedModule: boolean }) {
   const queryKey = ['course-includes', courseId]
   const [adding, setAdding] = useState(false)
   const includedIn = useQuery({
@@ -43,6 +43,16 @@ export default function IncludesTab({ courseId, priceVnd }: { courseId: number; 
         </p>
         <p className="text-muted-foreground">
           Chỉ hỗ trợ một cấp nên khóa này không thể chứa học phần khác.
+        </p>
+      </div>
+    )
+  }
+
+  if (isSharedModule && includes.data.length === 0) {
+    return (
+      <div className="flex max-w-4xl flex-col gap-3 rounded-lg border bg-card p-4 text-sm">
+        <p className="text-muted-foreground">
+          Khóa này là học phần chung nên không thể chứa học phần khác. Tắt "Đây là học phần chung" ở tab thông tin nếu muốn thêm học phần vào khóa này.
         </p>
       </div>
     )

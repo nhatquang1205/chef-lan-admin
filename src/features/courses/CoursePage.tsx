@@ -83,6 +83,7 @@ export default function CoursePage() {
         description={`/${course.slug}`}
         actions={
           <>
+            {course.isSharedModule && <StatusBadge variant="outline">Học phần chung</StatusBadge>}
             <StatusBadge variant={COURSE_STATUS_VARIANT[course.status]}>{COURSE_STATUS_LABEL[course.status]}</StatusBadge>
             {published && PUBLIC_SITE_URL && (
               <Button variant="outline" asChild>
@@ -142,7 +143,7 @@ export default function CoursePage() {
           <LessonList courseId={course.id} />
         </TabsContent>
         <TabsContent value="includes" className="pt-4">
-          <IncludesTab courseId={course.id} priceVnd={course.priceVnd} />
+          <IncludesTab courseId={course.id} priceVnd={course.priceVnd} isSharedModule={course.isSharedModule} />
         </TabsContent>
         <TabsContent value="images" className="pt-4">
           <ImagesTab courseId={course.id} />

@@ -18,6 +18,9 @@ import { COURSE_STATUS_LABEL, COURSE_STATUS_VARIANT, formatDate, formatDuration,
 const PAGE_SIZE = 20
 const ALL = 'all'
 
+const KIND_LABEL = { regular: 'Khóa học', module: 'Học phần chung' } as const
+type Kind = keyof typeof KIND_LABEL
+
 const SORT_LABEL: Record<CourseSortOrder, string> = {
   Newest: 'Mới nhất',
   PriceAsc: 'Giá tăng',
@@ -35,6 +38,10 @@ function parseParams(search: URLSearchParams): CourseListParams {
     status: oneOf(search.get('status'), Object.keys(COURSE_STATUS_LABEL) as CourseStatus[]),
     q: search.get('q') ?? undefined,
     categorySlug: search.get('categorySlug') ?? undefined,
+    isSharedModule: ((): boolean | undefined => {
+      const kind = oneOf<Kind>(search.get('kind'), ['regular', 'module'])
+      return kind === undefined ? undefined : kind === 'module'
+    })(),
     sort: oneOf(search.get('sort'), Object.keys(SORT_LABEL) as CourseSortOrder[]),
     page: Number.isInteger(page) && page > 1 ? page : 1,
   }
@@ -70,7 +77,10 @@ function CourseRow({ course }: { course: CourseListItemResponse }) {
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant={COURSE_STATUS_VARIANT[course.status]}>{COURSE_STATUS_LABEL[course.status]}</Badge>
+        <div className="flex flex-wrap gap-1">
+          <Badge variant={COURSE_STATUS_VARIANT[course.status]}>{COURSE_STATUS_LABEL[course.status]}</Badge>
+          {course.isSharedModule && <Badge variant="outline">Học phần chung</Badge>}
+        </div>
       </TableCell>
       <TableCell>
         <div className="flex min-w-32 flex-wrap gap-1">
@@ -148,7 +158,7 @@ export default function CoursesPage() {
     placeholderData: keepPreviousData,
   })
 
-  const hasFilters = Boolean(params.status || params.q || params.categorySlug || params.sort)
+  const hasFilters = Boolean(params.status || params.q || params.categorySlug || params.sort || params.isSharedModule !== undefined)
   const data = courses.data
   const addButton = (
     <Button asChild>
@@ -210,6 +220,22 @@ export default function CoursesPage() {
             {params.categorySlug && !categories.data?.some((c) => c.slug === params.categorySlug) && (
               <SelectItem value={params.categorySlug}>{params.categorySlug}</SelectItem>
             )}
+          </SelectContent>
+        </Select>
+        <Select
+          value={params.isSharedModule === undefined ? ALL : params.isSharedModule ? 'module' : 'regular'}
+          onValueChange={(v) => update({ kind: selectValue(v) })}
+        >
+          <SelectTrigger aria-label="Loại" className="w-40">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Tất cả</SelectItem>
+            {Object.entries(KIND_LABEL).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         <Select value={params.sort ?? 'Newest'} onValueChange={(v) => update({ sort: v === 'Newest' ? undefined : v })}>
