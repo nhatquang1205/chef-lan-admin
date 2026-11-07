@@ -104,6 +104,7 @@ Implement in order; each plan leaves the app building and usable.
 | 17 | [Course images (gallery) and WebP uploads](plans/17-course-images.md) — needs backend course-images B1 + B2 | done |
 | 18 | [Orders](plans/18-orders.md) — needs backend payments plan 02 | done |
 | 19 | [Shared modules](plans/19-shared-modules.md) — needs backend included-courses plan 04 | done |
+| 20 | [Create an order for a customer](plans/20-create-order.md) — needs backend payments plan 03 | todo |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.
