@@ -367,7 +367,7 @@ export interface GrantAccessFields {
 }
 
 export type OrderStatus = 'Pending' | 'Paid' | 'Expired' | 'Cancelled'
-export type OrderPaymentMethod = 'BankTransfer' | 'ContactChef'
+export type OrderPaymentMethod = 'BankTransfer' | 'ContactChef' | 'StaffCreated'
 export type OrderPaidVia = 'Webhook' | 'Manual'
 
 export interface AdminOrderItemResponse {
@@ -377,6 +377,7 @@ export interface AdminOrderItemResponse {
   listPriceVnd: number
   discountVnd: number
   unitPriceVnd: number
+  discountReason?: string | null
 }
 
 export interface AdminOrderResponse {
@@ -385,6 +386,8 @@ export interface AdminOrderResponse {
   status: OrderStatus
   paymentMethod: OrderPaymentMethod
   amountVnd: number
+  discountVnd?: number | null
+  discountReason?: string | null
   customerId: number
   customerName?: string | null
   customerEmail?: string | null
@@ -406,4 +409,35 @@ export interface OrderListParams {
   customerId?: number
   page?: number
   pageSize?: number
+}
+
+export interface StaffQuoteDiscount {
+  includedCourseId: number
+  title: string
+  discountVnd: number
+  reason: string
+}
+
+export interface StaffQuoteItem {
+  courseId: number
+  title: string
+  slug: string
+  status: CourseStatus
+  listPriceVnd: number
+  discounts: StaffQuoteDiscount[]
+  systemPriceVnd: number
+  alreadyOwned: boolean
+}
+
+export interface StaffOrderQuoteResponse {
+  items: StaffQuoteItem[]
+  subtotalVnd: number
+}
+
+export interface CreateStaffOrderRequest {
+  customerId: number
+  items: { courseId: number; unitPriceVnd?: number }[]
+  orderDiscountVnd?: number
+  orderDiscountReason?: string
+  note: string
 }

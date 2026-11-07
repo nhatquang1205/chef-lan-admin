@@ -10,6 +10,7 @@ import CoursePage from '@/features/courses/CoursePage'
 import CustomerCreatePage from '@/features/customers/CustomerCreatePage'
 import CustomerPage from '@/features/customers/CustomerPage'
 import CustomersPage from '@/features/customers/CustomersPage'
+import CreateOrderPage from '@/features/orders/CreateOrderPage'
 import OrdersPage from '@/features/orders/OrdersPage'
 import LessonCreatePage from '@/features/lessons/LessonCreatePage'
 import LessonPage from '@/features/lessons/LessonPage'
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/customers/new" element={<CustomerCreatePage />} />
           <Route path="/customers/:id" element={<CustomerPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/new" element={<CreateOrderPage />} />
           <Route path="/change-password" element={<ChangePasswordPage />} />
         </Route>
       </Route>

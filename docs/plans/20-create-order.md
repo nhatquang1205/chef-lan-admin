@@ -43,3 +43,23 @@ who messages the fanpage gets an order made by staff, already paid, and the acce
 discount on the one with the larger discount; adding the module itself discounts both; a customer who has the module gets both discounts;
 editing a price and adding an order discount give the expected total, matching the saved order; an owned course is flagged and blocks submit; the
 customer's access appears without a reload; 375 px holds. Test data removed. Notes added here.
+
+## Notes (implementation)
+
+Built: `/orders/new` (`CreateOrderPage`), "Tạo đơn hàng" on the Orders header and the customer's Orders tab (disabled, with a title, for a locked
+customer), `quoteOrder`/`createOrder`, new error messages, `Admin tạo` label, `OrderDialog` shows the order discount and per-item reasons (and hides
+"Hết hạn giữ đơn" for staff-created orders). `pnpm build` and `pnpm lint` are clean.
+
+Differences from the plan:
+- The quote discount field is `discountVnd` (not `amountVnd`), as the backend ships it.
+- Stale quote requests are not aborted; the query key holds the debounced course ids, so a late answer for old ids is never shown, and submit is held
+  ("Đang tính giá…") until the quote matches the current list.
+- A 409 on create is shown through the confirm dialog's toast, and the quote is refetched. The English server detail naming the course is replaced by a
+  Vietnamese message; the owned row is flagged by the refetched quote.
+- After success the customer's Orders tab opens the new order through `?tab=orders&order=<id>` (`OrdersTable` got an `openId` prop).
+- A locked customer (`Inactive`) cannot be picked, and a locked customer arriving through `?customerId=` shows a notice and blocks submit.
+
+NOT verified in a browser: the staff password could not be obtained in this session (reading the `Seed:AdminPassword` secret was refused), so no UI
+login was possible. Only the local API's quote endpoint was exercised with curl (shapes and numbers match the types: 46+47 -> 800000/600000;
+46+47+41 -> 700000/600000/550000; 47+48 -> 750000/650000; 49+42 -> 0/600000). Still to check by hand: the Done-when list (discounts shown, owned row
+blocks submit, edited price and order discount totals, access visible without reload, 375 px layout).

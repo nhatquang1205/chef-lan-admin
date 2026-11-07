@@ -134,7 +134,7 @@ export default function CustomerPage() {
           </div>
         </TabsContent>
         <TabsContent value="orders" className="pt-4">
-          <CustomerOrdersTab customerId={customer.id} />
+          <CustomerOrdersTab customerId={customer.id} isActive={customer.isActive} />
         </TabsContent>
       </Tabs>
       <ConfirmDialog

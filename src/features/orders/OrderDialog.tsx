@@ -151,9 +151,18 @@ function Details({
                   </span>
                 )}
               </div>
+              {item.discountReason && <p className="text-xs text-muted-foreground">{item.discountReason}</p>}
             </li>
           ))}
         </ul>
+        {order.discountVnd != null && order.discountVnd > 0 && (
+          <div className="flex justify-between gap-3 text-sm">
+            <span className="text-muted-foreground">
+              Giảm thêm cho cả đơn{order.discountReason ? ` (${order.discountReason})` : ''}
+            </span>
+            <span className="shrink-0">−{formatVnd(order.discountVnd)}</span>
+          </div>
+        )}
         <div className="flex justify-between gap-3 text-sm font-semibold">
           <span>Tổng cộng</span>
           <span>{formatVnd(order.amountVnd)}</span>
@@ -164,7 +173,9 @@ function Details({
         <h3 className="text-sm font-semibold">Thời gian</h3>
         <dl className="divide-y">
           <Row label="Ngày tạo">{formatDateTime(order.createdAt)}</Row>
-          <Row label="Hết hạn giữ đơn">{formatDateTime(order.expiresAt)}</Row>
+          {order.paymentMethod !== 'StaffCreated' && (
+            <Row label="Hết hạn giữ đơn">{formatDateTime(order.expiresAt)}</Row>
+          )}
           {order.paidAt && <Row label="Ngày thanh toán">{formatDateTime(order.paidAt)}</Row>}
           {order.status === 'Paid' && order.paidVia && (
             <Row label="Cách xác nhận">

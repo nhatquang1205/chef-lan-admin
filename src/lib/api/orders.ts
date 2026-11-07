@@ -1,6 +1,12 @@
 import { adminFetch } from './admin'
 import { queryClient } from '@/lib/query'
-import type { AdminOrderResponse, OrderListParams, PagedResult } from './types'
+import type {
+  AdminOrderResponse,
+  CreateStaffOrderRequest,
+  OrderListParams,
+  PagedResult,
+  StaffOrderQuoteResponse,
+} from './types'
 
 const BASE = '/api/v1/admins/orders'
 
@@ -18,6 +24,20 @@ export function listOrders(params: OrderListParams) {
   }
   const query = search.toString()
   return adminFetch<PagedResult<AdminOrderResponse>>(query ? `${BASE}?${query}` : BASE)
+}
+
+export function quoteOrder(customerId: number, courseIds: number[]) {
+  return adminFetch<StaffOrderQuoteResponse>(`${BASE}/quote`, { method: 'POST', body: { customerId, courseIds } })
+}
+
+export async function createOrder(input: CreateStaffOrderRequest) {
+  const order = await adminFetch<AdminOrderResponse>(BASE, { method: 'POST', body: input })
+  await Promise.all([
+    invalidateOrders(order.customerId),
+    queryClient.invalidateQueries({ queryKey: ['customer', order.customerId] }),
+    queryClient.invalidateQueries({ queryKey: ['courses'] }),
+  ])
+  return order
 }
 
 export async function markOrderPaid(id: number, reason: string) {

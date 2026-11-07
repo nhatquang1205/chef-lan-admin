@@ -12,10 +12,17 @@ interface Props {
   orders: AdminOrderResponse[]
   showCustomer?: boolean
   dimmed?: boolean
+  openId?: number
 }
 
-export default function OrdersTable({ orders, showCustomer = true, dimmed }: Props) {
-  const [selected, setSelected] = useState<AdminOrderResponse | null>(null)
+export default function OrdersTable({ orders, showCustomer = true, dimmed, openId }: Props) {
+  const [picked, setPicked] = useState<AdminOrderResponse | null>(null)
+  const [dismissed, setDismissed] = useState(false)
+  const selected = picked ?? (openId && !dismissed ? (orders.find((o) => o.id === openId) ?? null) : null)
+  const setSelected = (order: AdminOrderResponse | null) => {
+    setPicked(order)
+    if (!order) setDismissed(true)
+  }
 
   return (
     <>

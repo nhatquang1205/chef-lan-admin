@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
 import PageHeader from '@/components/PageHeader'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
 import { Button } from '@/components/ui/button'
@@ -90,7 +90,16 @@ export default function OrdersPage() {
 
   return (
     <>
-      <PageHeader title="Đơn hàng" description="Theo dõi và duyệt đơn mua khóa học, bài học." />
+      <PageHeader title="Đơn hàng" description="Theo dõi và duyệt đơn mua khóa học, bài học."
+        actions={
+          <Button asChild>
+            <Link to="/orders/new">
+              <Plus />
+              Tạo đơn hàng
+            </Link>
+          </Button>
+        }
+      />
 
       <div className="mb-4 flex flex-wrap gap-2">
         <div className="relative w-full sm:w-72">

@@ -73,7 +73,9 @@ All admin endpoints need `Authorization: Bearer <staff access token>`. Enums are
 
 **Orders** (`/api/v1/admins/orders`)
 - `GET ?status=&paymentMethod=&customerId=&q=&page=&pageSize=` → `PagedResult<AdminOrderResponse { id, code, status, paymentMethod, amountVnd, customerId, customerName?, customerEmail?, customerPhone?, createdAt, expiresAt, paidAt?, paidVia?, paidReason?, paidByStaffId?, paymentTransactionId?, items[{ kind, title, courseSlug, listPriceVnd, discountVnd, unitPriceVnd }] }>`
-  `status`: `Pending, Paid, Expired, Cancelled` (effective status). `paymentMethod`: `BankTransfer, ContactChef`. `paidVia`: `Webhook, Manual`.
+  `status`: `Pending, Paid, Expired, Cancelled` (effective status). `paymentMethod`: `BankTransfer, ContactChef, StaffCreated`. `paidVia`: `Webhook, Manual`.
+- `POST /quote` `{ customerId, courseIds[] }` → `{ items[{ courseId, title, slug, status, listPriceVnd, discounts[{ includedCourseId, title, discountVnd, reason }], systemPriceVnd, alreadyOwned }], subtotalVnd }` (nothing saved; owned courses flagged and left out of the subtotal)
+- `POST /` `{ customerId, items[{ courseId, unitPriceVnd? }], orderDiscountVnd?, orderDiscountReason?, note }` → 201 `AdminOrderResponse` (paid, access granted; now also `discountVnd`, `discountReason`, and items carry `discountReason`). Errors: 409 `order.already_owned`, 400 `order.total_not_positive`, `order.discount_too_large`, `order.price_out_of_range`, 409 `enrollment.already_active` on a race.
 - `POST /{id}/mark-paid` `{ reason }` → order (grants access; 409 `order.already_paid`) · `POST /{id}/cancel` → order (409 `order.not_pending`)
 
 **Errors**: `ProblemDetails { title, status, detail?, code? , errors? }`; validation 400 has
@@ -104,7 +106,7 @@ Implement in order; each plan leaves the app building and usable.
 | 17 | [Course images (gallery) and WebP uploads](plans/17-course-images.md) — needs backend course-images B1 + B2 | done |
 | 18 | [Orders](plans/18-orders.md) — needs backend payments plan 02 | done |
 | 19 | [Shared modules](plans/19-shared-modules.md) — needs backend included-courses plan 04 | done |
-| 20 | [Create an order for a customer](plans/20-create-order.md) — needs backend payments plan 03 | todo |
+| 20 | [Create an order for a customer](plans/20-create-order.md) — needs backend payments plan 03 | done |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.

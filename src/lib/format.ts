@@ -114,4 +114,5 @@ export const ORDER_STATUS_VARIANT: Record<OrderStatus, 'default' | 'secondary' |
 export const ORDER_METHOD_LABEL: Record<OrderPaymentMethod, string> = {
   BankTransfer: 'Chuyển khoản',
   ContactChef: 'Liên hệ Chef Lan',
+  StaffCreated: 'Admin tạo',
 }
