@@ -368,7 +368,7 @@ export interface GrantAccessFields {
 
 export type OrderStatus = 'Pending' | 'Paid' | 'Expired' | 'Cancelled'
 export type OrderPaymentMethod = 'BankTransfer' | 'ContactChef' | 'StaffCreated'
-export type OrderPaidVia = 'Webhook' | 'Manual'
+export type OrderPaidVia = 'Webhook' | 'Manual' | 'Free'
 
 export interface AdminOrderItemResponse {
   kind: 'Course' | 'Lesson'

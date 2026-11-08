@@ -107,6 +107,7 @@ Implement in order; each plan leaves the app building and usable.
 | 18 | [Orders](plans/18-orders.md) — needs backend payments plan 02 | done |
 | 19 | [Shared modules](plans/19-shared-modules.md) — needs backend included-courses plan 04 | done |
 | 20 | [Create an order for a customer](plans/20-create-order.md) — needs backend payments plan 03 | done |
+| 21 | [Free orders](plans/21-free-orders.md) — needs backend payments plan 05 | done |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.

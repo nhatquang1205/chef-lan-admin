@@ -179,7 +179,11 @@ function Details({
           {order.paidAt && <Row label="Ngày thanh toán">{formatDateTime(order.paidAt)}</Row>}
           {order.status === 'Paid' && order.paidVia && (
             <Row label="Cách xác nhận">
-              {order.paidVia === 'Webhook' ? 'Tự động qua cổng thanh toán' : 'Nhân viên duyệt'}
+              {order.paidVia === 'Webhook'
+                ? 'Tự động qua cổng thanh toán'
+                : order.paidVia === 'Free'
+                  ? 'Khóa học miễn phí'
+                  : 'Nhân viên duyệt'}
             </Row>
           )}
           {order.paidReason && <Row label="Lý do duyệt">{order.paidReason}</Row>}
