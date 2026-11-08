@@ -14,6 +14,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # The VITE_* values below are inlined at build time, and API_BASE_URL / PUBLIC_SITE_URL are variables of the
+    # `production` environment, which a job only sees when it names that environment.
+    environment: production
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4 # reads the pnpm version from package.json "packageManager"
