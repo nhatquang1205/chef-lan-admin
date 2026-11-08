@@ -15,8 +15,8 @@ No Node process and no port of its own on the VPS.
 
 Run as the deploy user (the same one chef-lan-web and wish-list use).
 
-1. **Domain.** In Cloudflare (DNS for `bonbocon.com`), add an `A` record `admin` pointing to the VPS IP, **DNS only**
-   (grey cloud, not proxied; no AAAA, the VPS has no IPv6). Wait until `dig +short admin.bonbocon.com` prints that IP.
+1. **Domain.** In Cloudflare (DNS for `bonbocon.com`), add an `A` record `admin` pointing to the VPS IP, **proxied**
+   (orange cloud; SSL/TLS mode Full (strict); no AAAA, the VPS has no IPv6). Wait until `dig +short admin.bonbocon.com` prints that IP.
 2. **rsync** (the workflow uploads with it): `rsync --version || sudo apt install -y rsync`
 3. **Web root owned by the deploy user** (nginx only needs to read it):
    ```bash
@@ -32,7 +32,7 @@ Run as the deploy user (the same one chef-lan-web and wish-list use).
    Until the first deploy, the site answers 404/403 (there is no `current` yet). That is expected.
 
 The API needs `Cors__AllowedOrigins__1=https://admin.bonbocon.com` in `~/chef-lan/.env` (and `__0` for the website);
-restart it after editing. The old `admin-cheflan.duckdns.org` host only redirects here (`chef-lan/deploy/nginx/duckdns-redirects`).
+restart it after editing. The old `admin-cheflan.duckdns.org` host is retired. Behind Cloudflare an upload is limited to 100 MB: upload big videos in the Bunny dashboard and paste the video ID.
 
 ## GitHub
 
