@@ -44,8 +44,10 @@ const isHttpUrl = (value: string) => {
 }
 
 function parseCsv(text: string): { rows: ImportRow[] } | { error: string } {
-  const result = Papa.parse<Record<string, string>>(text, {
+  // Files edited by hand often mix CRLF and LF; Papa guesses the line ending from the first line only, so normalise first.
+  const result = Papa.parse<Record<string, string>>(text.replace(/\r\n?/g, '\n'), {
     header: true,
+    newline: '\n',
     skipEmptyLines: 'greedy',
     delimitersToGuess: [',', ';'],
     transformHeader: normalize,

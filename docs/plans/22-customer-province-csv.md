@@ -40,3 +40,4 @@ Context and decisions: `../chef-lan/docs/customer-profile/spec.md`.
   `GET /api/v1/provinces` (`staleTime: Infinity`), also used for the list column. `CustomerRequest.email` is now required; the
   "send invite" checkbox no longer depends on email. The customers search placeholder no longer mentions Facebook.
 - Not exercised against a real API (by instruction); verified with `pnpm lint` and `pnpm build`.
+- Fix: a file mixing CRLF and LF line endings (header CRLF, rows LF, typical after editing by hand) was read as one data row, because Papa guesses the line ending from the first line. Line endings are now normalised to LF before parsing. Checked on the user's 9-row file: 1 row before, 9 after.
