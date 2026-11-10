@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { ChevronLeft, ChevronRight, Plus, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Search, Upload } from 'lucide-react'
 import PageHeader from '@/components/PageHeader'
 import { EmptyState, ErrorState, LoadingState } from '@/components/states'
 import { Badge } from '@/components/ui/badge'
@@ -10,7 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { listCustomers } from '@/lib/api/customers'
+import { getProvinces, listCustomers } from '@/lib/api/customers'
 import type { CustomerListItemResponse, CustomerListParams, CustomerStatus } from '@/lib/api/types'
 import { CUSTOMER_STATUS_LABEL, CUSTOMER_STATUS_VARIANT, formatDate, formatDateTime } from '@/lib/format'
 
@@ -28,7 +28,7 @@ function parseParams(search: URLSearchParams): CustomerListParams {
   }
 }
 
-function CustomerRow({ customer }: { customer: CustomerListItemResponse }) {
+function CustomerRow({ customer, provinceNames }: { customer: CustomerListItemResponse; provinceNames: Map<string, string> }) {
   const navigate = useNavigate()
   const href = `/customers/${customer.id}`
 
@@ -39,11 +39,13 @@ function CustomerRow({ customer }: { customer: CustomerListItemResponse }) {
           <Link to={href} className="font-medium hover:underline" onClick={(e) => e.stopPropagation()}>
             {customer.fullName}
           </Link>
-          {customer.facebookName && <p className="line-clamp-1 text-xs text-muted-foreground">{customer.facebookName}</p>}
         </div>
       </TableCell>
       <TableCell>{customer.email ?? '—'}</TableCell>
       <TableCell className="whitespace-nowrap">{customer.phone ?? '—'}</TableCell>
+      <TableCell className="whitespace-nowrap">
+        {customer.provinceCode ? (provinceNames.get(customer.provinceCode) ?? customer.provinceCode) : '—'}
+      </TableCell>
       <TableCell>
         <Badge variant={CUSTOMER_STATUS_VARIANT[customer.status]}>{CUSTOMER_STATUS_LABEL[customer.status]}</Badge>
       </TableCell>
@@ -105,8 +107,19 @@ export default function CustomersPage() {
     placeholderData: keepPreviousData,
   })
 
+  const provinces = useQuery({ queryKey: ['provinces'], queryFn: getProvinces, staleTime: Infinity })
+  const provinceNames = new Map((provinces.data ?? []).map((p) => [p.code, p.name]))
+
   const hasFilters = Boolean(params.status || params.q)
   const data = customers.data
+  const importButton = (
+    <Button variant="outline" asChild>
+      <Link to="/customers/import">
+        <Upload data-icon="inline-start" />
+        Nhập từ CSV
+      </Link>
+    </Button>
+  )
   const addButton = (
     <Button asChild>
       <Link to="/customers/new">
@@ -123,14 +136,20 @@ export default function CustomersPage() {
 
   return (
     <>
-      <PageHeader title="Khách hàng" description="Quản lý khách hàng, lời mời và quyền truy cập." actions={addButton} />
+      <PageHeader title="Khách hàng" description="Quản lý khách hàng, lời mời và quyền truy cập." actions={
+          <>
+            {importButton}
+            {addButton}
+          </>
+        }
+      />
 
       <div className="mb-4 flex flex-wrap gap-2">
         <div className="relative w-full sm:w-72">
           <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             className="pl-8"
-            placeholder="Tên, email, SĐT, Facebook…"
+            placeholder="Tên, email, SĐT…"
             aria-label="Tìm khách hàng"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -179,6 +198,7 @@ export default function CustomersPage() {
                     <TableHead>Khách hàng</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Điện thoại</TableHead>
+                    <TableHead>Tỉnh/thành</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Đăng nhập gần nhất</TableHead>
                     <TableHead>Ngày tạo</TableHead>
@@ -186,7 +206,7 @@ export default function CustomersPage() {
                 </TableHeader>
                 <TableBody>
                   {data.items.map((customer) => (
-                    <CustomerRow key={customer.id} customer={customer} />
+                    <CustomerRow key={customer.id} customer={customer} provinceNames={provinceNames} />
                   ))}
                 </TableBody>
               </Table>

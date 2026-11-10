@@ -264,7 +264,7 @@ export interface CustomerListItemResponse {
   fullName: string
   email?: string | null
   phone?: string | null
-  facebookName?: string | null
+  provinceCode?: string | null
   status: CustomerStatus
   invitedAt?: string | null
   activatedAt?: string | null
@@ -279,7 +279,7 @@ export interface CustomerDetailResponse {
   fullName: string
   email?: string | null
   phone?: string | null
-  facebookName?: string | null
+  provinceCode?: string | null
   facebookProfileUrl?: string | null
   note?: string | null
   isActive: boolean
@@ -294,12 +294,17 @@ export interface CustomerDetailResponse {
 
 export interface CustomerRequest {
   fullName: string
-  email: string | null
+  email: string
   phone: string | null
-  facebookName: string | null
+  provinceCode: string | null
   facebookProfileUrl: string | null
   note: string | null
   sendInvite?: boolean
+}
+
+export interface ProvinceResponse {
+  code: string
+  name: string
 }
 
 export interface InviteResponse {

@@ -8,6 +8,7 @@ import CoursesPage from '@/features/courses/CoursesPage'
 import CourseCreatePage from '@/features/courses/CourseCreatePage'
 import CoursePage from '@/features/courses/CoursePage'
 import CustomerCreatePage from '@/features/customers/CustomerCreatePage'
+import CustomerImportPage from '@/features/customers/CustomerImportPage'
 import CustomerPage from '@/features/customers/CustomerPage'
 import CustomersPage from '@/features/customers/CustomersPage'
 import CreateOrderPage from '@/features/orders/CreateOrderPage'
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/customers" element={<CustomersPage />} />
           <Route path="/customers/new" element={<CustomerCreatePage />} />
+          <Route path="/customers/import" element={<CustomerImportPage />} />
           <Route path="/customers/:id" element={<CustomerPage />} />
           <Route path="/orders" element={<OrdersPage />} />
           <Route path="/orders/new" element={<CreateOrderPage />} />

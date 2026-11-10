@@ -7,6 +7,7 @@ import type {
   CustomerRequest,
   InviteResponse,
   PagedResult,
+  ProvinceResponse,
 } from './types'
 
 const BASE = '/api/v1/admins/customers'
@@ -59,4 +60,13 @@ export async function inviteCustomer(id: number) {
   const result = await adminFetch<InviteResponse>(`${BASE}/${id}/invite`, { method: 'POST' })
   await invalidateCustomers(id)
   return result
+}
+
+export function getProvinces() {
+  return adminFetch<ProvinceResponse[]>('/api/v1/provinces')
+}
+
+// Import creates many customers in a row; the caller invalidates the list once at the end.
+export function createCustomerForImport(input: CustomerRequest) {
+  return adminFetch<CustomerDetailResponse>(BASE, { method: 'POST', body: input })
 }

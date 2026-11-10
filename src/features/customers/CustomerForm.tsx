@@ -1,8 +1,8 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
-import { Controller, useForm, useWatch } from 'react-hook-form'
+import { Controller, useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -11,10 +11,11 @@ import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import FieldLabel from '@/components/FieldLabel'
 import { Textarea } from '@/components/ui/textarea'
 import { ApiError } from '@/lib/api/client'
-import { createCustomer, updateCustomer } from '@/lib/api/customers'
+import { createCustomer, getProvinces, updateCustomer } from '@/lib/api/customers'
 import { fieldErrors, messageFor } from '@/lib/api/errors'
 import type { CustomerDetailResponse, CustomerRequest } from '@/lib/api/types'
 import { useUnsavedChangesPrompt } from '@/lib/useUnsavedChangesPrompt'
@@ -29,14 +30,15 @@ const isHttpUrl = (value: string) => {
 }
 
 const schema = z.object({
-  fullName: z.string().trim().min(1, 'Vui lòng nhập họ tên.').max(200, 'Tối đa 200 ký tự.'),
+  fullName: z.string().trim().min(1, 'Vui lòng nhập tên.').max(200, 'Tối đa 200 ký tự.'),
   email: z
     .string()
     .trim()
+    .min(1, 'Vui lòng nhập email.')
     .max(254, 'Tối đa 254 ký tự.')
     .refine((v) => v === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Email không hợp lệ.'),
   phone: z.string().trim().max(20, 'Tối đa 20 ký tự.'),
-  facebookName: z.string().trim().max(200, 'Tối đa 200 ký tự.'),
+  provinceCode: z.string(),
   facebookProfileUrl: z
     .string()
     .trim()
@@ -46,6 +48,8 @@ const schema = z.object({
   sendInvite: z.boolean(),
 })
 
+const NONE = '__none__'
+
 type FormValues = z.infer<typeof schema>
 
 function toValues(customer?: CustomerDetailResponse): FormValues {
@@ -53,7 +57,7 @@ function toValues(customer?: CustomerDetailResponse): FormValues {
     fullName: customer?.fullName ?? '',
     email: customer?.email ?? '',
     phone: customer?.phone ?? '',
-    facebookName: customer?.facebookName ?? '',
+    provinceCode: customer?.provinceCode ?? '',
     facebookProfileUrl: customer?.facebookProfileUrl ?? '',
     note: customer?.note ?? '',
     sendInvite: !customer,
@@ -65,12 +69,12 @@ const orNull = (value: string) => (value.trim() === '' ? null : value.trim())
 function toRequest(values: FormValues, isNew: boolean): CustomerRequest {
   return {
     fullName: values.fullName.trim(),
-    email: orNull(values.email),
+    email: values.email.trim(),
     phone: orNull(values.phone),
-    facebookName: orNull(values.facebookName),
+    provinceCode: orNull(values.provinceCode),
     facebookProfileUrl: orNull(values.facebookProfileUrl),
     note: orNull(values.note),
-    ...(isNew && { sendInvite: values.sendInvite && values.email.trim() !== '' }),
+    ...(isNew && { sendInvite: values.sendInvite }),
   }
 }
 
@@ -91,9 +95,9 @@ function Field({ label, htmlFor, error, required, children }: {
 }
 
 // Returns the confirmation text when saving would change a sign-in email or cancel a pending invite.
-function emailChangeWarning(customer: CustomerDetailResponse | undefined, nextEmail: string | null): string | null {
+function emailChangeWarning(customer: CustomerDetailResponse | undefined, nextEmail: string): string | null {
   if (!customer?.email) return null
-  if (customer.email.toLowerCase() === (nextEmail ?? '').toLowerCase()) return null
+  if (customer.email.toLowerCase() === nextEmail.toLowerCase()) return null
   if (customer.status === 'Active') {
     return 'Email này là tài khoản đăng nhập của khách. Đổi email sẽ đổi tên đăng nhập. Tiếp tục?'
   }
@@ -113,7 +117,7 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
     formState: { errors, isDirty },
   } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: toValues(customer) })
 
-  const hasEmail = (useWatch({ control, name: 'email' }) ?? '').trim() !== ''
+  const provinces = useQuery({ queryKey: ['provinces'], queryFn: getProvinces, staleTime: Infinity })
 
   useUnsavedChangesPrompt(isDirty)
 
@@ -165,11 +169,11 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
           <CardTitle>Thông tin</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Field label="Họ tên" required htmlFor="fullName" error={errors.fullName?.message}>
+          <Field label="Tên" required htmlFor="fullName" error={errors.fullName?.message}>
             <Input id="fullName" aria-invalid={!!errors.fullName} {...register('fullName')} />
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Email" htmlFor="email" error={errors.email?.message}>
+            <Field label="Email" required htmlFor="email" error={errors.email?.message}>
               <Input id="email" type="email" aria-invalid={!!errors.email} {...register('email')} />
             </Field>
             <Field label="Điện thoại" htmlFor="phone" error={errors.phone?.message}>
@@ -177,8 +181,29 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
             </Field>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Tên Facebook" htmlFor="facebookName" error={errors.facebookName?.message}>
-              <Input id="facebookName" aria-invalid={!!errors.facebookName} {...register('facebookName')} />
+            <Field label="Tỉnh/thành" htmlFor="provinceCode" error={errors.provinceCode?.message}>
+              <Controller
+                control={control}
+                name="provinceCode"
+                render={({ field }) => (
+                  <Select
+                    value={field.value === '' ? NONE : field.value}
+                    onValueChange={(v) => field.onChange(v === NONE ? '' : v)}
+                  >
+                    <SelectTrigger id="provinceCode" className="w-full" aria-invalid={!!errors.provinceCode}>
+                      <SelectValue placeholder={provinces.isPending ? 'Đang tải…' : 'Chưa chọn'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={NONE}>Chưa chọn</SelectItem>
+                      {provinces.data?.map((p) => (
+                        <SelectItem key={p.code} value={p.code}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </Field>
             <Field label="Link Facebook" htmlFor="facebookProfileUrl" error={errors.facebookProfileUrl?.message}>
               <Input
@@ -200,8 +225,7 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="sendInvite"
-                    checked={field.value && hasEmail}
-                    disabled={!hasEmail}
+                    checked={field.value}
                     onCheckedChange={(checked) => field.onChange(checked === true)}
                   />
                   <FieldLabel htmlFor="sendInvite">Gửi email mời ngay</FieldLabel>
@@ -230,7 +254,7 @@ export default function CustomerForm({ customer }: { customer?: CustomerDetailRe
           if (!open) setPending(null)
         }}
         title="Đổi email?"
-        description={emailChangeWarning(customer, pending?.email ?? null) ?? undefined}
+        description={emailChangeWarning(customer, pending?.email ?? '') ?? undefined}
         confirmLabel="Tiếp tục"
         onConfirm={async () => {
           if (pending) await submit(pending)
