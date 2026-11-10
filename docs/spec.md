@@ -109,6 +109,7 @@ Implement in order; each plan leaves the app building and usable.
 | 20 | [Create an order for a customer](plans/20-create-order.md) — needs backend payments plan 03 | done |
 | 21 | [Free orders](plans/21-free-orders.md) — needs backend payments plan 05 | done |
 | 22 | [Customer province, required email, CSV import](plans/22-customer-province-csv.md) — needs backend customer-profile B1 | done |
+| 23 | [Grant dialog: load more and select several at once](plans/23-grant-dialog-multi-select.md) | done |
 
 Plans 12–14 depend on backend work in `../chef-lan/docs/customer-invitations/` (B1 email, B2 customers API, B3
 invitations). 10 and 11 need no backend change and can be done first.
